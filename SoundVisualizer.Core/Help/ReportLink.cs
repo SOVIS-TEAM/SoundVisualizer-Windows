@@ -16,7 +16,7 @@ namespace SoundVisualizer.Help
         public const string IssuesUrl = "https://github.com/SOVIS-Team/SoundVisualizer-Windows/issues/new";
 
         /// <summary>메일 제보를 받는 곳. 안드로이드 판과 같은 주소다.</summary>
-        public const string ReportEmail = "nawwhod@gmail.com";
+        public const string ReportEmail = "sovis.kr@gmail.com";
 
         /// <summary>제보 본문 끝에 붙는 네 줄. 줄은 \n 으로 나눈다.</summary>
         public static string EnvironmentBlock(string appVersion, string windows, string dotnet, string language) =>
