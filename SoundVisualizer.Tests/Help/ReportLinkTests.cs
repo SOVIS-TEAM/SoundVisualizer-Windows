@@ -109,7 +109,7 @@ public class ReportLinkTests
     public void 제보는_PC_판_저장소와_안드로이드와_같은_메일로_간다()
     {
         Assert.Equal("https://github.com/SOVIS-Team/SoundVisualizer-Windows/issues/new", ReportLink.IssuesUrl);
-        Assert.Equal("nawwhod@gmail.com", ReportLink.ReportEmail);
+        Assert.Equal("sovis.kr@gmail.com", ReportLink.ReportEmail);
     }
 
     private static string Title(string url) => Uri.UnescapeDataString(Between(url, "?title=", "&body="));
