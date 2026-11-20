@@ -15,13 +15,13 @@ Microsoft Store 에 올리는 Windows 판 패키지입니다. 스토어가 서�
 
 ## 스토어 값
 
-Partner Center 에서 앱 이름을 예약한 뒤 **제품 관리 > 제품 ID** 에 나오는 세 값을 씁니다.
+Partner Center 에서 앱 이름을 예약한 뒤 **제품 관리 > 제품 ID** 에 나오는 세 값을 씁니다. 지금 값(스토어 ID 9NGH48VCRFW2)은 저장소 변수에 들어 있습니다.
 
 | 패키지 정보 | 넣는 곳 |
 |---|---|
 | Package/Identity/Name | `-IdentityName`, 또는 저장소 변수 `MSIX_IDENTITY_NAME` |
 | Package/Identity/Publisher | `-Publisher`, 또는 저장소 변수 `MSIX_PUBLISHER` |
-| Package/Properties/PublisherDisplayName | `-PublisherDisplayName` (기본 SOVIS) |
+| Package/Properties/PublisherDisplayName | `-PublisherDisplayName`, 또는 저장소 변수 `MSIX_PUBLISHER_DISPLAY_NAME` (기본 SOVIS Team) |
 
 저장소 변수를 넣어 두면 Run workflow 에서 입력하지 않아도 됩니다. 값을 넣지 않으면 묶이는지만 보는 시험용 값으로 만듭니다.
 

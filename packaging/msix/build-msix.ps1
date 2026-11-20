@@ -8,7 +8,7 @@
 param(
     [string]$IdentityName = "SOVIS.SoundVisualizer",
     [string]$Publisher = "CN=SOVIS",
-    [string]$PublisherDisplayName = "SOVIS",
+    [string]$PublisherDisplayName = "SOVIS Team",
     [string]$Version = "",
     [string]$OutDir = "artifacts"
 )
