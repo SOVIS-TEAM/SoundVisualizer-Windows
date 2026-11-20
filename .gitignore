@@ -6,3 +6,6 @@ obj/
 *.sln.docstates
 .agents/mcp_config.json
 *.lscache
+
+# MSIX 패키지 만들기(packaging/msix/build-msix.ps1)의 결과물
+artifacts/

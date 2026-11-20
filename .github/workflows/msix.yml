@@ -1,0 +1,41 @@
+name: msix
+
+# Microsoft Store 에 올릴 MSIX 패키지를 만든다. 패키지 관련 파일이 바뀐 PR 에서는 묶이는지만 확인하고,
+# 손으로 실행하면(Actions > msix > Run workflow) 스토어에서 받은 값으로 만든 패키지를 내려받을 수 있다.
+on:
+  workflow_dispatch:
+    inputs:
+      identity_name:
+        description: "Partner Center 의 Package/Identity/Name"
+        required: false
+      publisher:
+        description: "Partner Center 의 Package/Identity/Publisher (CN=...)"
+        required: false
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "packaging/msix/**"
+      - ".github/workflows/msix.yml"
+      - "SoundVisualizer/SoundVisualizer.csproj"
+
+jobs:
+  msix:
+    name: MSIX 패키지
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: MSIX 만들기
+        shell: pwsh
+        env:
+          # 입력값은 명령에 바로 넣지 않고 환경 변수로 넘긴다.
+          IDENTITY_NAME: ${{ inputs.identity_name || vars.MSIX_IDENTITY_NAME || 'SOVIS.SoundVisualizer' }}
+          PUBLISHER: ${{ inputs.publisher || vars.MSIX_PUBLISHER || 'CN=SOVIS' }}
+        run: ./packaging/msix/build-msix.ps1 -IdentityName $env:IDENTITY_NAME -Publisher $env:PUBLISHER
+      - uses: actions/upload-artifact@v4
+        with:
+          name: msix
+          path: artifacts/*.msix
+          if-no-files-found: error

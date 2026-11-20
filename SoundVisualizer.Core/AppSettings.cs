@@ -196,8 +196,11 @@ namespace SoundVisualizer
         public const bool DefaultEasySettings = true;
         public static bool EasySettings { get; set; } = DefaultEasySettings;
 
-        /// <summary>설정 파일 위치. 포터블 배포라 실행 파일 옆에 둔다. 테스트는 임시 파일로 바꾼다.</summary>
-        public static string SettingsFilePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json");
+        /// <summary>
+        /// 설정 파일 위치. zip 판은 실행 파일 옆, MSIX 패키지로 설치하면 사용자 폴더다(<see cref="AppPaths.DataDirectory"/>).
+        /// 테스트는 임시 파일로 바꾼다.
+        /// </summary>
+        public static string SettingsFilePath { get; set; } = Path.Combine(AppPaths.DataDirectory, "settings.json");
 
         /// <summary>
         /// 저장을 이만큼 미뤄 모은다. 슬라이더를 끌면 값이 바뀔 때마다 저장을 부르는데, 그때마다 파일을 쓰면
@@ -434,6 +437,9 @@ namespace SoundVisualizer
                     OpacityFixedMaxOpacity = OpacityFixedMaxOpacity
                 };
                 var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+                // 패키지 설치에서는 사용자 폴더 아래 앱 폴더가 처음에는 없다.
+                string? directory = Path.GetDirectoryName(SettingsFilePath);
+                if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
                 File.WriteAllText(SettingsFilePath, json);
             }
             catch (Exception ex)
