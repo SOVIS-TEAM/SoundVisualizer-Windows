@@ -19,7 +19,7 @@
 
 **실시간 오디오 시각화 및 AI 기반 사운드 분석 오버레이**
 
-**[웹사이트](https://sovis-team.github.io/) · [소개 영상](https://youtu.be/NBRV5AWpb38) · [받기](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases/latest) · [Android 버전](https://github.com/SOVIS-Team/SoundVisualizer-Android) · [인스타그램](https://www.instagram.com/sovis.official/)**
+**[웹사이트](https://sovis-team.github.io/) · [소개 영상](https://youtu.be/NBRV5AWpb38) · [받기](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases/latest) · [Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2) · [Android 버전](https://github.com/SOVIS-Team/SoundVisualizer-Android) · [인스타그램](https://www.instagram.com/sovis.official/)**
 
 </div>
 
@@ -116,7 +116,7 @@
 
 ## 🚀 설치 및 실행 방법
 
-SoundVisualizer는 설치가 필요 없는 가벼운 **포터블(Portable)** 패키지로 제공됩니다. Windows 10/11 (64비트)에서 돌아가며, .NET 을 따로 설치하지 않아도 됩니다.
+SoundVisualizer는 설치가 필요 없는 가벼운 **포터블(Portable)** 패키지로 제공됩니다. Windows 10/11 (64비트)에서 돌아가며, .NET 을 따로 설치하지 않아도 됩니다. **[Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2)**에서도 받을 수 있습니다.
 
 1. **[GitHub Releases](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases)** 페이지에 접속합니다.
 2. 최신 버전의 `SoundVisualizer_vX.Y.zip` 파일을 다운로드해 원하는 곳에 압축 해제합니다.
