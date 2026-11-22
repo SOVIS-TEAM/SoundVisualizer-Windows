@@ -19,7 +19,7 @@
 
 **Real-Time Audio Visualization & AI Sound Analysis Overlay Engine**
 
-**[Website](https://sovis-team.github.io/en/) · [Demo video](https://youtu.be/NBRV5AWpb38) · [Download](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases/latest) · [Android version](https://github.com/SOVIS-Team/SoundVisualizer-Android) · [Instagram](https://www.instagram.com/sovis.official/)**
+**[Website](https://sovis-team.github.io/en/) · [Demo video](https://youtu.be/NBRV5AWpb38) · [Download](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases/latest) · [Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2) · [Android version](https://github.com/SOVIS-Team/SoundVisualizer-Android) · [Instagram](https://www.instagram.com/sovis.official/)**
 
 </div>
 
@@ -116,7 +116,7 @@ The project is rigorously engineered for high-performance, real-time background 
 
 ## 🚀 Installation & Quick Start
 
-SoundVisualizer is provided as a lightweight, **portable (no-install)** open-source package for Windows 10/11 (64-bit). You don't need to install .NET.
+SoundVisualizer is provided as a lightweight, **portable (no-install)** open-source package for Windows 10/11 (64-bit). You don't need to install .NET. You can also get it from the **[Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2)**.
 
 1. Go to the **[GitHub Releases](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases)** page.
 2. Download the latest `SoundVisualizer_vX.Y.zip` file and extract it to any location on your PC.
