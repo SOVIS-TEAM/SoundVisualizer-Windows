@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>soundvisualizer</id>
+    <version>2.1.1</version>
+    <packageSourceUrl>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/tree/main/packaging/chocolatey</packageSourceUrl>
+    <owners>sovis</owners>
+    <title>SoundVisualizer</title>
+    <authors>SOVIS Team</authors>
+    <projectUrl>https://sovis-team.github.io/en/</projectUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/SOVIS-TEAM/SoundVisualizer-Windows@main/packaging/msix/Assets/Square150x150Logo.png</iconUrl>
+    <copyright>SOVIS Team</copyright>
+    <licenseUrl>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows</projectSourceUrl>
+    <docsUrl>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows#readme</docsUrl>
+    <bugTrackerUrl>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/issues</bugTrackerUrl>
+    <tags>soundvisualizer accessibility deaf hard-of-hearing sound audio visualizer overlay wasapi foss portable</tags>
+    <summary>Shows the sounds your PC is playing as a glow along the screen edges, for deaf and hard-of-hearing people.</summary>
+    <description><![CDATA[SoundVisualizer is an open-source accessibility app for deaf and hard-of-hearing people. It listens to the Windows audio output (WASAPI loopback, like desktop audio capture in OBS) and draws a click-through glow along the edges of the screen, on top of videos, music and games.
+
+## Features
+
+- **Direction:** the side a sound comes from glows more. Left and right, plus front and back with 5.1 or 7.1 audio output.
+- **Loudness:** louder sounds are drawn bigger.
+- **Sound type:** an on-device classifier (YAMNet and Silero VAD through ONNX Runtime) colors sounds as ambient, human sounds, or danger such as sirens and alarms. It can be wrong when many sounds overlap.
+- **Display modes:** wave, pad, circle and outline. F2/F3 switch modes and F4 lets you drag the drawing area to fit your screen; hotkeys can be changed.
+- **Simple settings:** a settings view where you choose by picture. The launcher works with the keyboard and screen readers such as Narrator and NVDA.
+- **Private:** everything runs on your PC. Audio is never saved or sent anywhere, and no account or internet connection is needed.
+
+It was designed and tested with deaf and hard-of-hearing students at Seoul National School for the Deaf.
+
+## Notes
+
+- Windows 10/11, 64-bit only. No .NET installation is needed.
+- Games need borderless or windowed mode for the overlay to show on top.
+- Settings are saved in `settings.json` next to the program in the package folder. Copy it somewhere safe before upgrading if you want to keep your settings.
+- This package downloads the official zip from GitHub Releases and checks its SHA-256 checksum, then adds a Start menu shortcut.
+- Also available on the [Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2).
+]]></description>
+    <releaseNotes>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/releases/tag/SoundVisualizer_v2.1.1</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
