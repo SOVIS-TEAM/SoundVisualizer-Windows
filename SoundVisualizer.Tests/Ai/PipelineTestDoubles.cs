@@ -99,6 +99,9 @@ internal sealed class FakeSileroModel : ISileroModel
     /// <summary>덩어리를 볼 때마다 부른다. 예외를 던지면 미리보기 스레드가 실패한다.</summary>
     public Action<int>? OnScore { get; set; }
 
+    /// <summary>상태를 비울 때마다 미리보기 스레드에서 부른다. 테스트가 그 자리에 스레드를 붙잡아 둔다.</summary>
+    public Action? OnReset { get; set; }
+
     public int ScoreCalls => Volatile.Read(ref _scoreCalls);
 
     public int ResetCalls => Volatile.Read(ref _resetCalls);
@@ -111,6 +114,7 @@ internal sealed class FakeSileroModel : ISileroModel
     {
         if (DisposeCalls != 0) Interlocked.Exchange(ref _usedAfterDispose, 1);
         Interlocked.Increment(ref _resetCalls);
+        OnReset?.Invoke();
     }
 
     public float Score(ReadOnlySpan<float> block)

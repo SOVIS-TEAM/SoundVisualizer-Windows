@@ -48,6 +48,8 @@ namespace SoundVisualizer.Ai
         private long _resets;
         private long _invalidScores;
         private long _next;
+        // _next 가 링의 어느 세대의 자리인지. 깰 때마다 _next 를 쓴 뒤에 쓴다(NextOutputSample 이 이 순서에 기대어 읽는다).
+        private long _generationOfNext = -1;
 
         /// <param name="buffer">읽을 AI 링. 레이트는 만들 때 정해진다.</param>
         /// <param name="modelFactory">이 스레드 안에서 한 번 부른다. 만든 모델은 이 스레드가 닫는다.</param>
@@ -89,8 +91,22 @@ namespace SoundVisualizer.Ai
         /// <summary>모델을 만들거나 돌리다 실패해 미리보기를 껐는지. 정규 분류는 상관없이 돈다.</summary>
         public bool Failed => Volatile.Read(ref _failed) != 0;
 
-        /// <summary>다음에 볼 덩어리의 시작(지금 세대의 16kHz 샘플 번호). 테스트가 따라잡았는지 기다리는 데 쓴다.</summary>
-        internal long NextOutputSample => Interlocked.Read(ref _next);
+        /// <summary>
+        /// 다음에 볼 덩어리의 시작(링의 지금 세대의 16kHz 샘플 번호). 테스트가 따라잡았는지 기다리는 데 쓴다.
+        /// 캡처를 다시 시작한 뒤 이 스레드가 아직 깨어 새 세대를 알아보지 못했으면 0 이다. 이전 캡처에서 본 자리를 그대로 내면
+        /// 기다리는 쪽이 새 캡처도 이미 따라잡은 것으로 본다.
+        /// </summary>
+        internal long NextOutputSample
+        {
+            get
+            {
+                // 세대, 자리, 링의 세대 순서로 읽는다. 스레드는 자리를 쓴 뒤에 그 세대를 쓰므로, 읽은 세대가 링의 지금 세대와 같으면
+                // 그 뒤에 읽은 자리도 지금 세대의 것이다.
+                long generation = Interlocked.Read(ref _generationOfNext);
+                long next = Interlocked.Read(ref _next);
+                return generation == _buffer.Cursor().Generation ? next : 0;
+            }
+        }
 
         /// <summary>스레드가 아직 도는지(테스트용).</summary>
         internal bool IsAlive => _thread.IsAlive;
@@ -162,6 +178,8 @@ namespace SoundVisualizer.Ai
                         _discontinuity();
                     }
                     Interlocked.Exchange(ref _next, next);
+                    // 자리를 쓴 뒤에 그 자리의 세대를 쓴다. 순서를 바꾸면 NextOutputSample 이 이전 세대의 자리를 지금 세대의 것으로 낸다.
+                    Interlocked.Exchange(ref _generationOfNext, epoch);
 
                     int processed = 0;
                     while (!IsClosed && processed++ < MaxBlocksPerWake)
