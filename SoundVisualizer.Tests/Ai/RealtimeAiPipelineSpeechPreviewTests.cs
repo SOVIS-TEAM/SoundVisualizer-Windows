@@ -266,6 +266,45 @@ public class RealtimeAiPipelineSpeechPreviewTests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void 다시_시작한_뒤_미리보기_스레드가_새_캡처를_알아보기_전에는_이전_캡처에서_본_자리를_내지_않는다()
+    {
+        // 따라잡기(WaitCaughtUp)는 미리보기 스레드가 다음에 볼 자리로 기다리는데, 그 자리는 스레드가 깨어야 바뀐다. 다시 시작한 직후에
+        // 이전 캡처에서 본 자리를 그대로 내면, 새 캡처에서 기다릴 자리가 그보다 뒤가 아닐 때 기다리지 않고 돌아온다. 그러면 스레드가 새
+        // 캡처를 알아보기도 전에 틱과 단언이 앞서 나간다. 느린 CI 에서 위의 시험이 그렇게 가끔 실패했다(#30).
+        using var entered = new ManualResetEventSlim();
+        using var release = new ManualResetEventSlim();
+        var silero = new FakeSileroModel();
+        using var h = new Harness(16000, 1, silero: silero);
+        h.Feed(Block * 4);
+        h.WaitCaughtUp();
+        Assert.Equal(Block * 4, h.Worker.NextOutputSample);
+
+        h.Pipeline.Stop();
+        // 늦게 깨는 스레드를 만든다. 새 세대를 알아보고 모델 상태를 비우는 자리에 붙잡아 둔 채 새 캡처의 소리를 넣는다.
+        silero.OnReset = () =>
+        {
+            entered.Set();
+            release.Wait(WaitLimit);
+        };
+        try
+        {
+            h.Pipeline.Start();
+            h.Feed(Block * 2);
+            Assert.True(entered.Wait(WaitLimit), "the worker did not notice the new capture");
+            Assert.Equal(0, h.Worker.NextOutputSample);
+        }
+        finally
+        {
+            silero.OnReset = null;
+            release.Set();
+        }
+
+        // 풀어 주면 새 캡처의 자리를 처음부터 센다.
+        h.WaitCaughtUp();
+        Assert.Equal(Block * 2, h.Worker.NextOutputSample);
+    }
+
+    [Fact]
     public void 확률이_0점9_아래인_덩어리가_끼면_받아들이지_않는다()
     {
         // 새 덩어리 가운데 두 번째만 0.89 다. 이어진 세 개가 모이지 않는다.
@@ -610,7 +649,10 @@ public class RealtimeAiPipelineSpeechPreviewTests(ITestOutputHelper output)
         Assert.True(SpinWait.SpinUntil(condition, WaitLimit), "condition not reached");
     }
 
-    /// <summary>미리보기 스레드가 지금 링에 있는 완성 덩어리를 모두 볼 때까지 기다린다.</summary>
+    /// <summary>
+    /// 미리보기 스레드가 지금 링에 있는 완성 덩어리를 모두 볼 때까지 기다린다. 다시 시작한 직후에도 그렇다. 스레드가 새 캡처를
+    /// 알아보기 전에는 <see cref="SileroStreamWorker.NextOutputSample"/> 이 이전 캡처에서 본 자리가 아니라 0 이다.
+    /// </summary>
     private static void WaitCaughtUp(SileroStreamWorker worker, AiAudioBuffer buffer, int rate)
     {
         long expected = CaughtUpPosition(buffer.Cursor().Frames, rate);
