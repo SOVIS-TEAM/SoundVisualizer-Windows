@@ -127,6 +127,14 @@
                                             <ListBoxItem Content="{l:Loc settings.channels.7_1}"/>
                                         </ui:ChoiceChipList>
 
+                                        <!-- 표시할 모니터(#29). 모니터가 두 대 이상일 때만 보인다(ReloadDisplayCards 가 접는다). 최대 프레임의 끝값이 선택한
+                                             모니터의 주사율이라 그 위에 둔다. 쉬운 설정에도 같은 칸이 있다(Ui/DisplayPicker). -->
+                                        <StackPanel x:Name="PanelOverlayDisplay" Margin="0,0,0,24" Visibility="Collapsed">
+                                            <TextBlock Style="{StaticResource Text.Label}" Text="{l:Loc settings.display.title}"/>
+                                            <TextBlock Style="{StaticResource Text.Description}" Margin="0,4,0,12" Text="{l:Loc settings.display.desc}"/>
+                                            <ui:DisplayPicker x:Name="DisplayCardsDetailed"/>
+                                        </StackPanel>
+
                                         <Slider x:Name="SldTargetFps" Style="{StaticResource SliderRow}" Minimum="30" Maximum="240"
                                                 ui:SettingRow.Label="{l:Loc settings.max_fps.title}" ui:SettingRow.Description="{l:Loc settings.max_fps.desc}"
                                                 ui:SettingRow.ValueFormat="{}{0:F0} FPS" ValueChanged="Setting_Changed"/>

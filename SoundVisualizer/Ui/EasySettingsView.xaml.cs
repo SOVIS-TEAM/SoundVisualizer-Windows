@@ -22,6 +22,7 @@ namespace SoundVisualizer.Ui
     /// - 크기: 슬라이더 대신 세 단계(EasySizes). 지금 모드의 크기만 바꾼다. 자세한 설정에서 단계와 다르게 맞춘 크기면 어느 칸도 선택해 두지 않고
     ///   한 줄로 알린다(#425). 밑의 '자세한 설정' 칸은 자세한 설정의 그 칸으로 간다(#429, 런처가 옮긴다).
     /// - 소리 종류: 종류마다 화면 표시를 켜고 끈다. 안드로이드의 진동 세 칸은 PC 에 진동이 없어 뺐다.
+    /// - 표시할 모니터(#29, PC 에만 있다): 모니터가 두 대 이상일 때만 보이고, 오버레이를 띄울 모니터를 그림 칸으로 선택한다(DisplayPicker).
     ///
     /// 쉬운 설정은 자기가 맡은 값만 바꾼다. 자세한 설정에만 있는 값(속도·민감도·광원·색·단축키 등)은 그대로 남아 계속 적용된다.
     /// 값은 AppSettings 에 바로 쓰고 저장을 예약한 뒤 <see cref="SettingsChanged"/> 로 알린다. 런처가 자세한 설정의 칸을 맞춘다.
@@ -151,6 +152,11 @@ namespace SoundVisualizer.Ui
             AutomationProperties.SetName(ChkDanger, EasyNames.TypeRow(Loc.Get("sounds.type.danger"), Loc.Get("settings.show_danger"), pair));
             AutomationProperties.SetName(ChkSpeech, EasyNames.TypeRow(Loc.Get("sounds.type.speech"), Loc.Get("settings.show_speech"), pair));
             AutomationProperties.SetName(ChkAmbient, EasyNames.TypeRow(Loc.Get("sounds.type.ambient"), Loc.Get("settings.show_ambient"), pair));
+
+            // 표시할 모니터(#29): 칸의 이름("모니터 1", 주 모니터)도 코드가 넣는다. 연결된 모니터를 다시 읽어 칸과 선택을 맞추고,
+            // 모니터가 한 대뿐이면 구역을 통째로 접는다.
+            DisplayCards.Reload();
+            PanelDisplay.Visibility = DisplayCards.HasChoices ? Visibility.Visible : Visibility.Collapsed;
         }
 
         /// <summary>모드 이름(표현 모드 칸과 같은 글자).</summary>

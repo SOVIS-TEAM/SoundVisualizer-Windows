@@ -134,6 +134,7 @@ namespace SoundVisualizer
             LoadSettingsToEditPanel(); // UI 초기화 직후 설정값을 미리 반영하여, 지연된 레이아웃 패스에서 기본값(50)이 이벤트를 발생시켜도 올바른 값이 유지되도록 함
             _isUpdatingEditPanelSliders = false;
             ApplyClickThroughMagic();
+            InitOverlayDisplay(); // 선택한 모니터에 놓는다(MainWindow.Display.cs)
             BootSequence();
             StartHighFpsRenderLoop();
             InitDebugHud(); // 개발자 모드 HUD 와 결과 기록(MainWindow.DebugHud.cs)

@@ -8,6 +8,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using SoundVisualizer.Localization;
 using SoundVisualizer.Sounds;
+using SoundVisualizer.Display;
 
 namespace SoundVisualizer
 {
@@ -154,6 +155,10 @@ namespace SoundVisualizer
 
         public static bool AutoMinimizeOnLaunch { get; set; } = false;
 
+        // 8.5.2. 오버레이를 표시할 모니터(#29). 선택한 모니터의 이름(Display.DisplayInfo.Key)이고, 선택한 적이 없으면 빈 문자열이라
+        // 주 모니터에 띄운다. 그 모니터가 연결되어 있지 않을 때도 주 모니터에 띄우고 값은 지우지 않는다(Display.OverlayDisplays).
+        public static string OverlayDisplay { get; set; } = OverlayDisplays.Primary;
+
         // 8.6. 렌더링 최대 프레임
         public static double TargetFps { get; set; } = DefaultTargetFps;
 
@@ -258,6 +263,8 @@ namespace SoundVisualizer
                         IsAdminMode = data.IsAdminMode;
                         DeveloperRecord = data.DeveloperRecord;
                         AutoMinimizeOnLaunch = data.AutoMinimizeOnLaunch;
+                        // 모니터를 선택하는 설정이 생기기 전의 파일에는 없다. 그때는 주 모니터다.
+                        OverlayDisplay = data.OverlayDisplay ?? OverlayDisplays.Primary;
                         if (data.TargetFps >= 30.0) TargetFps = data.TargetFps;
                         ShowAmbient = data.ShowAmbient;
                         ShowSpeech = data.ShowSpeech;
@@ -290,8 +297,9 @@ namespace SoundVisualizer
                         // 모드 설정을 읽은 뒤라야 한다.
                         EasySettings = data.EasySettings ?? DefaultEasySettingsFor(WaveMode, PadMode, CircleMode, OutlineMode);
 
-                        int maxRate = GetMonitorRefreshRate();
-                        if (TargetFps > maxRate) TargetFps = maxRate;
+                        // 최대 프레임은 읽은 값 그대로 둔다. 예전에는 여기서 주 모니터의 주사율로 깎았는데, 표시할 모니터를 고를 수 있게 된
+                        // 뒤로는(#29) 선택한 모니터가 연결되지 않은 채 켜기만 해도 그 값이 낮아진 채 저장됐다. 슬라이더 끝값과 그리기는
+                        // 어차피 화면 주사율을 넘지 않는다.
                     }
                 }
             }
@@ -383,6 +391,7 @@ namespace SoundVisualizer
             IsAdminMode = false;
             DeveloperRecord = false;
             AutoMinimizeOnLaunch = false;
+            OverlayDisplay = OverlayDisplays.Primary;
             TargetFps = Math.Min(DefaultTargetFps, GetMonitorRefreshRate());
 
             ShowAmbient = true;
@@ -409,6 +418,7 @@ namespace SoundVisualizer
                     IsAdminMode = IsAdminMode,
                     DeveloperRecord = DeveloperRecord,
                     AutoMinimizeOnLaunch = AutoMinimizeOnLaunch,
+                    OverlayDisplay = OverlayDisplay,
                     TargetFps = TargetFps,
                     ShowAmbient = ShowAmbient,
                     ShowSpeech = ShowSpeech,
@@ -508,13 +518,32 @@ namespace SoundVisualizer
 
         private const int VREFRESH = 116;
 
+        /// <summary>
+        /// 오버레이를 표시할 모니터의 주사율. 최대 프레임 슬라이더의 끝값이다. 모니터마다 주사율이 다를 수 있어(144Hz 게임 모니터와 60Hz 보조
+        /// 모니터) 선택한 모니터의 것을 쓴다. 모니터를 읽지 못하면 예전처럼 주 모니터의 값을 쓴다.
+        /// </summary>
         public static int GetMonitorRefreshRate()
+        {
+            try
+            {
+                var display = OverlayDisplays.Resolve(DisplayEnumerator.Current(), OverlayDisplay);
+                if (display != null && display.RefreshRate > 0) return display.RefreshRate;
+            }
+            catch (Exception ex)
+            {
+                AppLog.Warn("display", "오버레이를 표시할 모니터의 주사율을 읽지 못했습니다.", ex);
+            }
+            return GetPrimaryRefreshRate();
+        }
+
+        private static int GetPrimaryRefreshRate()
         {
             IntPtr hDC = GetDC(IntPtr.Zero);
             try
             {
                 int rate = GetDeviceCaps(hDC, VREFRESH);
-                return rate > 0 ? rate : 60; // 디바이스 주사율 질의 실패 시 안전하게 60Hz 리턴
+                // 0 과 1 은 '하드웨어 기본값'이라는 뜻이라 주사율로 쓰지 않는다(DisplayEnumerator 와 같은 규칙). 그때와 실패하면 60Hz.
+                return rate > 1 ? rate : 60;
             }
             catch
             {
@@ -553,6 +582,8 @@ namespace SoundVisualizer
             // 결과 기록이 생기기 전의 설정 파일에는 없어 꺼진 채로 읽힌다.
             public bool DeveloperRecord { get; set; } = false;
             public bool AutoMinimizeOnLaunch { get; set; } = false;
+            // 오버레이를 표시할 모니터. 예전 설정 파일에는 없어 null 로 읽힌다(그때는 주 모니터).
+            public string? OverlayDisplay { get; set; }
             public double TargetFps { get; set; } = 144.0;
             public bool ShowAmbient { get; set; } = true;
             public bool ShowSpeech { get; set; } = true;

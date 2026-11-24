@@ -273,7 +273,7 @@
         </Style>
     </UserControl.Resources>
 
-    <!-- 화면 읽어주기와 Tab 키의 차례는 보이는 차례와 같다: 모양 → 크기(칸 셋 → 안내 → '자세한 설정') → 소리 종류 셋.
+    <!-- 화면 읽어주기와 Tab 키의 차례는 보이는 차례와 같다: 모양 → 크기(칸 셋 → 안내 → '자세한 설정') → 소리 종류 셋 → (모니터가 두 대 이상이면) 표시할 모니터.
          선택지 묶음 안의 순번("4개 중 2번째")은 칸을 놓은 차례로 매겨져 줄을 나눠도 보이는 차례와 같다(안드로이드 #434 에서 고친 것). -->
     <StackPanel>
         <TextBlock x:Name="TxtShapeTitle" Style="{StaticResource EasySection}" Text="{l:Loc easy.section.shape}"/>
@@ -323,5 +323,14 @@
                           Checked="TypeRow_Changed" Unchecked="TypeRow_Changed"/>
             </StackPanel>
         </Border>
+
+        <!-- 표시할 모니터(#29). 모니터가 두 대 이상일 때만 보인다(ReloadSelection 이 접는다). 칸을 만들고 선택을 저장하는 일은 Ui/DisplayPicker 가
+             하고, 바뀐 것은 런처가 받아 자세한 설정의 칸과 떠 있는 오버레이에 옮긴다. -->
+        <StackPanel x:Name="PanelDisplay" Visibility="Collapsed">
+            <TextBlock Style="{StaticResource EasySection}" Text="{l:Loc settings.display.title}"/>
+            <Border Style="{StaticResource EasyCard}">
+                <ui:DisplayPicker x:Name="DisplayCards"/>
+            </Border>
+        </StackPanel>
     </StackPanel>
 </UserControl>

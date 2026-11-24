@@ -3,6 +3,7 @@
 // SoundVisualizer is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
 using System.Text.Json;
 using SoundVisualizer.Ai;
+using SoundVisualizer.Display;
 
 namespace SoundVisualizer.Tests;
 
@@ -147,6 +148,60 @@ public sealed class AppSettingsTests : IDisposable
         Assert.Equal(77, AppSettings.CircleMode.CircleRadius);
         Assert.Equal(new[] { 0x11, 0x56 }, AppSettings.VisualModeKeyBind);
         Assert.False(AppSettings.ShowSpeech);
+    }
+
+    [Fact]
+    public void 표시할_모니터는_선택한_적이_없으면_주_모니터이고_저장한_뒤_다시_읽힌다()
+    {
+        // 오버레이를 표시할 모니터(#29). 빈 문자열은 주 모니터를 따른다는 뜻이다.
+        Assert.Equal(OverlayDisplays.Primary, AppSettings.OverlayDisplay);
+
+        const string chosen = @"\\?\DISPLAY#GSM5B09#5&1c9bd0f&0&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}";
+        AppSettings.OverlayDisplay = chosen;
+        AppSettings.SaveNow();
+        Assert.Equal(chosen, JsonDocument.Parse(File.ReadAllText(_path)).RootElement.GetProperty("OverlayDisplay").GetString());
+
+        AppSettings.ResetToDefaults();
+        AppSettings.Load();
+
+        Assert.Equal(chosen, AppSettings.OverlayDisplay);
+    }
+
+    [Fact]
+    public void 표시할_모니터_항목이_없는_예전_설정은_주_모니터로_읽는다()
+    {
+        // 앞에서 들고 있던 값이 남지 않는지도 본다.
+        AppSettings.OverlayDisplay = @"\\.\DISPLAY2";
+        File.WriteAllText(_path, """{ "IsAdminMode": true, "Language": "ko" }""");
+
+        AppSettings.Load();
+
+        Assert.True(AppSettings.IsAdminMode);
+        Assert.Equal(OverlayDisplays.Primary, AppSettings.OverlayDisplay);
+    }
+
+    [Fact]
+    public void 전체_초기화는_표시할_모니터를_주_모니터로_되돌린다()
+    {
+        // 자세한 설정의 첫 카드에 있는 값이라 사운드 모드·최대 프레임과 함께 되돌린다.
+        AppSettings.OverlayDisplay = @"\\.\DISPLAY2";
+
+        AppSettings.ResetToDefaults();
+
+        Assert.Equal(OverlayDisplays.Primary, AppSettings.OverlayDisplay);
+    }
+
+    [Fact]
+    public void 최대_프레임은_읽은_값_그대로이고_모니터의_주사율로_깎지_않는다()
+    {
+        // 예전에는 읽을 때 주 모니터의 주사율로 깎았다. 표시할 모니터를 고를 수 있게 된 뒤로는(#29) 선택한 144Hz 모니터가 빠진 채
+        // 켜기만 해도 값이 낮아진 채 저장됐다. 슬라이더 끝값과 그리기는 어차피 화면 주사율을 넘지 않는다.
+        // 240 은 어느 시험 기계의 주사율보다도 크므로, 깎는 코드가 남아 있으면 여기서 드러난다.
+        File.WriteAllText(_path, """{ "TargetFps": 240 }""");
+
+        AppSettings.Load();
+
+        Assert.Equal(240, AppSettings.TargetFps);
     }
 
     [Fact]
