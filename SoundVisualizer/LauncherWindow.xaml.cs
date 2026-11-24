@@ -42,6 +42,7 @@ namespace SoundVisualizer
             };
             InitializeUI();
             Loc.Instance.LanguageChanged += OnLanguageChanged;
+            WatchDisplays(); // 모니터 선택 칸의 알림과 모니터 구성의 변화(LauncherWindow.Display.cs)
             
             try
             {
@@ -54,6 +55,7 @@ namespace SoundVisualizer
         protected override void OnClosed(EventArgs e)
         {
             Loc.Instance.LanguageChanged -= OnLanguageChanged;
+            UnwatchDisplays();
 
             // 1. 오버레이 창 종료 처리 (오류 발생 시에도 계속 진행)
             try
@@ -170,6 +172,7 @@ namespace SoundVisualizer
             if (_bindingTarget != "Edit") BtnEditHotkey.Content = GetKeysName(AppSettings.EditModeKeyBind);
             Ui.ColorButtonNames.Apply(BtnColorAmbient, BtnColorSpeech, BtnColorDanger);
             EasyView.ApplyCodeTexts();
+            ReloadDisplayCards(); // 모니터 칸의 이름("모니터 1", 주 모니터)도 코드가 넣는다
         }
 
         private void SetStatusUI(bool isRunning)
@@ -190,8 +193,14 @@ namespace SoundVisualizer
             // 2. 공통 설정
             ChipsVisualMode.SelectedIndex = AppSettings.VisualMode;
             ChipsSoundMode.SelectedIndex = AppSettings.SoundMode;
+            // 표시할 모니터(#29). 최대 프레임의 끝값은 그 모니터의 주사율이다. 저장값이 끝값보다 크면 슬라이더는 끝에 머물지만,
+            // 슬라이더가 좁힌 값을 저장하지 않는다(Setting_Changed 를 막는다). 주사율이 높은 모니터로 돌아오면 저장값이 다시 보인다.
+            ReloadDisplayCards();
+            bool wasInitializing = _isInitializing;
+            _isInitializing = true;
             SldTargetFps.Maximum = AppSettings.GetMonitorRefreshRate();
             SldTargetFps.Value = AppSettings.TargetFps;
+            _isInitializing = wasInitializing;
             ChkAdminMode.IsChecked = AppSettings.IsAdminMode;
             ChkDeveloperRecord.IsChecked = AppSettings.DeveloperRecord;
             Show(ChkDeveloperRecord, AppSettings.IsAdminMode);
@@ -637,6 +646,8 @@ namespace SoundVisualizer
 
             _isInitializing = false;
             SyncOverlayEditPanel();
+            // 표시할 모니터도 기본값(주 모니터)으로 돌아갔다. 떠 있는 오버레이도 옮긴다(#29).
+            _overlayWindow?.MoveToSelectedDisplay();
         }
 
         private void Window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

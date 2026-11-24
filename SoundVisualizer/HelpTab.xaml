@@ -152,7 +152,7 @@
                 </StackPanel>
             </Expander>
 
-            <!-- PC 에만 있는 것: 사운드 모드(5.1·7.1, VB-CABLE), 단축키, 오버레이 편집, 크기 고정, 개발자 모드. 글은 예전 도움말 카드 그대로다. -->
+            <!-- PC 에만 있는 것: 사운드 모드(5.1·7.1, VB-CABLE), 여러 모니터, 단축키, 오버레이 편집, 크기 고정, 개발자 모드. 글은 예전 도움말 카드 그대로다. -->
             <Expander Style="{StaticResource Help.Card}" Header="{l:Loc help.pc.title}">
                 <StackPanel Style="{StaticResource Help.CardBody}">
                     <StackPanel Style="{StaticResource Help.Item}">
@@ -160,6 +160,11 @@
                         <TextBlock Style="{StaticResource Help.ItemText}" Text="{l:Loc help.sound_mode.body}"/>
                         <!-- help.sound_mode.tip 의 {0} 자리에 링크가 온다. 앞뒤 글은 ApplyTexts 가 넣는다. 요소 사이 공백이 글자가 되지 않게 붙여 쓴다. -->
                         <TextBlock Style="{StaticResource Text.Warning}" Margin="0,8,0,0"><Run x:Name="TxtTipPrefix"/><Hyperlink Style="{StaticResource Link}" NavigateUri="https://vb-audio.com/Cable/" RequestNavigate="Hyperlink_RequestNavigate"><Run Text="{l:Loc help.sound_mode.tip_link}"/></Hyperlink><Run x:Name="TxtTipSuffix"/></TextBlock>
+                    </StackPanel>
+                    <StackPanel Style="{StaticResource Help.Item}">
+                        <TextBlock Style="{StaticResource Help.ItemTitle}" Text="{l:Loc help.display.title}"/>
+                        <!-- 오버레이를 표시할 모니터(#29). 설정의 이름이 들어가 코드가 채운다(ApplyTexts). -->
+                        <TextBlock x:Name="TxtDisplayHelp" Style="{StaticResource Help.ItemText}"/>
                     </StackPanel>
                     <StackPanel Style="{StaticResource Help.Item}">
                         <TextBlock Style="{StaticResource Help.ItemTitle}" Text="{l:Loc help.hotkeys.title}"/>

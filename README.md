@@ -65,6 +65,7 @@ We provide 4 unique rendering modes that intuitively map sound intensity and dir
 - **Outline Mode**: A minimalist variation of Wave mode, showing only the thin borders of the wave to minimize screen occlusion.
 - Animations move at the same speed at any frame rate, from 30 FPS up to your monitor's refresh rate.
 - **Easy settings**: The Settings tab opens with a picture-based view where you choose the shape, the size (Small, Medium, Large), and which sound types to show. Switch to “Detailed” for every other setting.
+- **Choose the display**: With two or more displays connected, choose which one shows the overlay in the Settings tab. The maximum frame rate goes up to that display's refresh rate. If that display is disconnected, the overlay is shown on the main display and returns when the display is connected again.
 
 ### 2. On-Screen Real-Time Editor (F4)
 Modify settings instantly while in a full-screen application or game without minimizing the window.

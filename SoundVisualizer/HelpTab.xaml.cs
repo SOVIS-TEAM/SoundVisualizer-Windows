@@ -52,6 +52,7 @@ namespace SoundVisualizer
             TxtStart4.Text = Loc.Format("help.start.4", Loc.Get("launcher.home.stop"));
             TxtFaqPerformance.Text = Loc.Format("help.faq.performance_a", Loc.Get("settings.max_fps.title"), Loc.Get("settings.glow.title"));
             TxtDeveloper.Text = Loc.Format("help.developer.body", Loc.Get("settings.developer_record.title"));
+            TxtDisplayHelp.Text = Loc.Format("help.display.body", Loc.Get("settings.display.title"));
             TxtFaqLanguage.Text = Loc.Format("help.faq.language_a", Loc.Get("common.language"), Loc.Get("language.system"));
             TxtVersion.Text = Loc.Format("help.about.version", AppVersionText.Display(InformationalVersion));
 
