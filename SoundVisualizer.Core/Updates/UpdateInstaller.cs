@@ -98,6 +98,8 @@ namespace SoundVisualizer.Updates
                     Directory.CreateDirectory(Path.GetDirectoryName(target)!);
                     File.Copy(Path.Combine(stagingDirectory, entry.Path), target + NewSuffix, overwrite: true);
                 }
+                // 바꿔 끼우기 전에 복사본을 디스크까지 써 둔다. 그러지 않으면 "다 바꿈" 을 쓴 직후 정전에서 새 파일 내용이 빈 채 남을 수 있다.
+                foreach (var entry in entries) FlushToDisk(Path.Combine(installDirectory, entry.Path) + NewSuffix);
                 // 2. 이름만 바꿔 끼운다.
                 foreach (var entry in entries)
                 {
@@ -343,6 +345,13 @@ namespace SoundVisualizer.Updates
                 failed.Add(JournalName);
             }
             return new RestoreResult(failed.Count == 0, failed);
+        }
+
+        /// <summary>파일의 캐시된 내용을 디스크에 쓴다.</summary>
+        private static void FlushToDisk(string path)
+        {
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.Read);
+            stream.Flush(flushToDisk: true);
         }
 
         /// <summary>파일을 지운다. 지울 수 없으면(실행 중인 exe, 읽기 전용) 이름을 바꿔 치우고 false.</summary>
