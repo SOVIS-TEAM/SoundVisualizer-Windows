@@ -258,7 +258,23 @@
                 <StackPanel Style="{StaticResource Help.CardBody}">
                     <!-- 굵게 보이지만 제목이 아니라 버전 글이다. -->
                     <TextBlock x:Name="TxtVersion" Style="{StaticResource Help.ItemTitle}" AutomationProperties.HeadingLevel="None"/>
-                    <TextBlock Style="{StaticResource Help.ItemText}" Margin="0,8,0,0" Text="{l:Loc help.about.license}"/>
+                    <!-- 업데이트(#36). zip 판은 GitHub 에 묻고 바로 바꾼다. Store 판은 Store 를 연다. Chocolatey 판은 choco 명령을 보인다.
+                         어느 것을 보일지와 글은 코드(ApplyUpdateState)가 정한다. 상태 글은 화면 읽어주기가 읽고 지나간다. -->
+                    <TextBlock x:Name="TxtUpdateStatus" Style="{StaticResource Help.ItemText}" Margin="0,8,0,0" Visibility="Collapsed"
+                               AutomationProperties.LiveSetting="Polite"/>
+                    <StackPanel x:Name="PanelChocolatey" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource Help.ItemText}" Margin="0,8,0,0" Text="{l:Loc update.chocolatey}"/>
+                        <!-- 명령은 번역하지 않으므로 아랍어 화면에서도 왼쪽에서 오른쪽으로 둔다. -->
+                        <Border Background="{StaticResource BackgroundBrush}" CornerRadius="12" Padding="16,12" Margin="0,12,0,0" FlowDirection="LeftToRight">
+                            <TextBlock x:Name="TxtChocolateyCommand" FontFamily="{StaticResource MonoFontFamily}" FontSize="13" FontWeight="Normal"
+                                       Foreground="{StaticResource PrimaryTextBrush}" TextWrapping="Wrap"/>
+                        </Border>
+                        <Button Style="{StaticResource Help.Button}" Content="{l:Loc update.copy_command}" Click="BtnCopyChocolatey_Click"/>
+                    </StackPanel>
+                    <Button x:Name="BtnUpdateCheck" Style="{StaticResource Help.Button}" Click="BtnUpdateCheck_Click"/>
+                    <Button x:Name="BtnUpdateInstall" Style="{StaticResource Help.Button}" Content="{l:Loc update.install}" Visibility="Collapsed" Click="BtnUpdateInstall_Click"/>
+                    <Button x:Name="BtnUpdatePage" Style="{StaticResource Help.Button}" Content="{l:Loc update.open_page}" Visibility="Collapsed" Click="BtnUpdatePage_Click"/>
+                    <TextBlock Style="{StaticResource Help.ItemText}" Margin="0,16,0,0" Text="{l:Loc help.about.license}"/>
                     <Button Style="{StaticResource Help.Button}" Margin="0,16,0,0" Content="{l:Loc help.licenses.button}" Click="BtnLicenses_Click"/>
                 </StackPanel>
             </Expander>

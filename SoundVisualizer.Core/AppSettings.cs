@@ -155,6 +155,12 @@ namespace SoundVisualizer
 
         public static bool AutoMinimizeOnLaunch { get; set; } = false;
 
+        // 8.5.1.1. 런처를 열 때 하루 한 번 새 버전을 확인할지(#36). zip 판에만 쓴다(Store·Chocolatey 판은 그쪽이 업데이트한다).
+        // 기본은 켜짐이다. 마지막으로 확인한 때는 사용자가 고르는 값이 아니라 초기화하지 않는다.
+        public const bool DefaultCheckUpdatesOnStart = true;
+        public static bool CheckUpdatesOnStart { get; set; } = DefaultCheckUpdatesOnStart;
+        public static DateTimeOffset? LastUpdateCheck { get; set; }
+
         // 8.5.2. 오버레이를 표시할 모니터(#29). 선택한 모니터의 이름(Display.DisplayInfo.Key)이고, 선택한 적이 없으면 빈 문자열이라
         // 주 모니터에 띄운다. 그 모니터가 연결되어 있지 않을 때도 주 모니터에 띄우고 값은 지우지 않는다(Display.OverlayDisplays).
         public static string OverlayDisplay { get; set; } = OverlayDisplays.Primary;
@@ -263,6 +269,9 @@ namespace SoundVisualizer
                         IsAdminMode = data.IsAdminMode;
                         DeveloperRecord = data.DeveloperRecord;
                         AutoMinimizeOnLaunch = data.AutoMinimizeOnLaunch;
+                        // 업데이트 확인이 생기기 전의 파일에는 없다. 그때는 기본(켜짐)이다.
+                        CheckUpdatesOnStart = data.CheckUpdatesOnStart ?? DefaultCheckUpdatesOnStart;
+                        LastUpdateCheck = data.LastUpdateCheck;
                         // 모니터를 선택하는 설정이 생기기 전의 파일에는 없다. 그때는 주 모니터다.
                         OverlayDisplay = data.OverlayDisplay ?? OverlayDisplays.Primary;
                         if (data.TargetFps >= 30.0) TargetFps = data.TargetFps;
@@ -391,6 +400,7 @@ namespace SoundVisualizer
             IsAdminMode = false;
             DeveloperRecord = false;
             AutoMinimizeOnLaunch = false;
+            CheckUpdatesOnStart = DefaultCheckUpdatesOnStart;
             OverlayDisplay = OverlayDisplays.Primary;
             TargetFps = Math.Min(DefaultTargetFps, GetMonitorRefreshRate());
 
@@ -418,6 +428,8 @@ namespace SoundVisualizer
                     IsAdminMode = IsAdminMode,
                     DeveloperRecord = DeveloperRecord,
                     AutoMinimizeOnLaunch = AutoMinimizeOnLaunch,
+                    CheckUpdatesOnStart = CheckUpdatesOnStart,
+                    LastUpdateCheck = LastUpdateCheck,
                     OverlayDisplay = OverlayDisplay,
                     TargetFps = TargetFps,
                     ShowAmbient = ShowAmbient,
@@ -582,6 +594,9 @@ namespace SoundVisualizer
             // 결과 기록이 생기기 전의 설정 파일에는 없어 꺼진 채로 읽힌다.
             public bool DeveloperRecord { get; set; } = false;
             public bool AutoMinimizeOnLaunch { get; set; } = false;
+            // 업데이트 확인(#36). 예전 설정 파일에는 없어 null 로 읽힌다(그때는 켜짐, 확인한 적 없음).
+            public bool? CheckUpdatesOnStart { get; set; }
+            public DateTimeOffset? LastUpdateCheck { get; set; }
             // 오버레이를 표시할 모니터. 예전 설정 파일에는 없어 null 로 읽힌다(그때는 주 모니터).
             public string? OverlayDisplay { get; set; }
             public double TargetFps { get; set; } = 144.0;

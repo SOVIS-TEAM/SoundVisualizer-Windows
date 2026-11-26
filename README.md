@@ -126,6 +126,14 @@ SoundVisualizer is provided as a lightweight, **portable (no-install)** open-sou
 
 Your settings are saved in `settings.json` next to `SoundVisualizer.exe`, so the folder can be moved or copied as is.
 
+### Updates
+
+- **Zip version**: once a day, when you open the launcher, the app checks GitHub for the latest version. If there is a new one, a notice appears on Home; click **Update now** and the app downloads the new zip, checks its SHA-256, replaces the files in the same folder, and reopens. Your settings file stays. You can also check from Help > About > **Check for updates**, and turn off the automatic check with Settings > Advanced > **Check for updates on start**.
+- **Microsoft Store version**: the Store updates the app. The app does not connect to the internet.
+- **Chocolatey version**: update with `choco upgrade soundvisualizer -y` in an administrator Command Prompt. The app does not connect to the internet.
+
+When the zip version checks for updates, it only sends a GitHub API request (with a User-Agent containing the app name and version). It never sends sound, settings or personal information.
+
 ---
 
 ## 🛠 Build Guide (For Developers)
