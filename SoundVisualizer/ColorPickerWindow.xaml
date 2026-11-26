@@ -14,7 +14,7 @@
     <!-- 안드로이드 색 선택 창과 같은 모양: 채도(가로) x 밝기(세로) 사각형, 색상 막대, #RRGGBB, 미리 담긴 색 8개(네 개씩 두 줄).
          색 코드는 키보드로 고칠 수 있게 입력칸으로 둔다. 서식과 색은 Themes/Theme.xaml 에 있다.
          오른쪽에서 왼쪽으로 쓰는 언어면 창 내용 전체를 뒤집는다. 사각형·막대의 마우스 좌표도 함께 뒤집혀 고른 색은 같다. -->
-    <Border Background="{StaticResource CardBrush}" CornerRadius="20" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1" FlowDirection="{Binding FlowDirection, Source={x:Static l:Loc.Instance}}">
+    <Border Background="{StaticResource CardBrush}" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1" FlowDirection="{Binding FlowDirection, Source={x:Static l:Loc.Instance}}">
         <StackPanel Margin="24">
             <!-- 제목과 닫기 -->
             <Grid Margin="0,0,0,16">
