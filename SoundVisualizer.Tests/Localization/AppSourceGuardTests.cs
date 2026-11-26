@@ -140,7 +140,7 @@ public class AppSourceGuardTests
     public void 영어_표의_키는_모두_앱에서_쓴다()
     {
         // 쓰지 않는 키는 번역가가 헛수고를 한다. 키는 코드에서 이어 붙이지 말고 통째로 적는다.
-        var referenced = ReferencedKeys();
+        var referenced = ReferencedKeys(includeCore: true);
         var unused = StringTables.Get(UiLanguages.DefaultCode)!.Entries.Keys.Where(key => !referenced.Contains(key)).Order(StringComparer.Ordinal).ToArray();
         Assert.True(unused.Length == 0, "앱에서 쓰지 않는 키: " + string.Join(", ", unused));
     }
@@ -153,7 +153,7 @@ public class AppSourceGuardTests
     }
 
     /// <summary>XAML 의 {l:Loc 키} 와, 코드에서 키 꼴(화면 이름으로 시작하는 점 찍은 소문자)인 문자열 리터럴.</summary>
-    private static HashSet<string> ReferencedKeys()
+    private static HashSet<string> ReferencedKeys(bool includeCore = false)
     {
         var groups = StringTables.Get(UiLanguages.DefaultCode)!.Entries.Keys.Select(key => key[..key.IndexOf('.')]).ToHashSet(StringComparer.Ordinal);
         var keys = new HashSet<string>(StringComparer.Ordinal);
@@ -162,7 +162,9 @@ public class AppSourceGuardTests
             string text = XamlComment.Replace(File.ReadAllText(file), "");
             foreach (Match match in XamlLocKey.Matches(text)) keys.Add(match.Groups[1].Value);
         }
-        foreach (var file in SourceFiles("*.cs"))
+        // 화면 없이 시험하려고 Core 가 고르는 키도 있다(업데이트 상태 글, Updates/UpdateView). "쓰지 않는 키" 를 볼 때는 그 키도 쓰는 키로 친다.
+        // "없는 키" 를 볼 때는 앱만 본다. Core 에는 키처럼 생긴 다른 글자(settings.json)가 있다.
+        foreach (var file in includeCore ? SourceFiles("*.cs").Concat(CoreSourceFiles()) : SourceFiles("*.cs"))
         {
             foreach (var token in Tokenize(File.ReadAllText(file)))
             {
@@ -171,6 +173,13 @@ public class AppSourceGuardTests
             }
         }
         return keys;
+    }
+
+    private static IEnumerable<string> CoreSourceFiles()
+    {
+        string core = Path.Combine(RepositoryRoot(), "SoundVisualizer.Core");
+        return Directory.EnumerateFiles(core, "*.cs", SearchOption.AllDirectories)
+            .Where(path => !Path.GetRelativePath(core, path).Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(part => part is "bin" or "obj"));
     }
 
     private static IEnumerable<string> SourceFiles(string pattern) =>

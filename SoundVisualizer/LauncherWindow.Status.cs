@@ -69,6 +69,8 @@ namespace SoundVisualizer
         /// <summary>오버레이를 띄운다. 홈의 실행 버튼과 트레이 메뉴가 부른다.</summary>
         private void StartOverlay()
         {
+            // 업데이트가 실행 폴더의 파일을 바꾸는 중이면 켜지 않는다. 켜면 바꾸는 중인 모델·DLL 을 연다(#36). 몇 초 뒤 새 버전이 열린다.
+            if (Updates.UpdateController.InstallingNow) return;
             if (_overlayWindow != null)
             {
                 Dialogs.Show(Loc.Get("dialog.already_running"), Loc.Get("dialog.notice_title"), MessageBoxButton.OK, MessageBoxImage.Information);

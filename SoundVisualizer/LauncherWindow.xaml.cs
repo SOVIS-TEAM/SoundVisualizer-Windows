@@ -43,6 +43,7 @@ namespace SoundVisualizer
             InitializeUI();
             Loc.Instance.LanguageChanged += OnLanguageChanged;
             WatchDisplays(); // 모니터 선택 칸의 알림과 모니터 구성의 변화(LauncherWindow.Display.cs)
+            WatchUpdates(); // 업데이트 안내와 런처를 열 때의 확인(LauncherWindow.Updates.cs)
             
             try
             {
@@ -56,6 +57,7 @@ namespace SoundVisualizer
         {
             Loc.Instance.LanguageChanged -= OnLanguageChanged;
             UnwatchDisplays();
+            UnwatchUpdates();
 
             // 1. 오버레이 창 종료 처리 (오류 발생 시에도 계속 진행)
             try
@@ -173,6 +175,7 @@ namespace SoundVisualizer
             Ui.ColorButtonNames.Apply(BtnColorAmbient, BtnColorSpeech, BtnColorDanger);
             EasyView.ApplyCodeTexts();
             ReloadDisplayCards(); // 모니터 칸의 이름("모니터 1", 주 모니터)도 코드가 넣는다
+            UpdateUpdateNotice(announce: false); // 업데이트 안내(버전, 진행률)도 코드가 넣는다
         }
 
         private void SetStatusUI(bool isRunning)
@@ -205,6 +208,7 @@ namespace SoundVisualizer
             ChkDeveloperRecord.IsChecked = AppSettings.DeveloperRecord;
             Show(ChkDeveloperRecord, AppSettings.IsAdminMode);
             if (ChkAutoMinimizeOnLaunch != null) ChkAutoMinimizeOnLaunch.IsChecked = AppSettings.AutoMinimizeOnLaunch;
+            ChkCheckUpdates.IsChecked = AppSettings.CheckUpdatesOnStart;
 
             if (BtnVisualHotkey != null) BtnVisualHotkey.Content = GetKeysName(AppSettings.VisualModeKeyBind);
             if (BtnSoundModeHotkey != null) BtnSoundModeHotkey.Content = GetKeysName(AppSettings.StereoUpmixKeyBind);
@@ -517,6 +521,7 @@ namespace SoundVisualizer
                 }
                 else if (sender == ChkDeveloperRecord) AppSettings.DeveloperRecord = ChkDeveloperRecord.IsChecked ?? false;
                 else if (sender == ChkAutoMinimizeOnLaunch) AppSettings.AutoMinimizeOnLaunch = ChkAutoMinimizeOnLaunch.IsChecked ?? false;
+                else if (sender == ChkCheckUpdates) AppSettings.CheckUpdatesOnStart = ChkCheckUpdates.IsChecked ?? AppSettings.DefaultCheckUpdatesOnStart;
                 else if (sender == ChkShowAmbient) AppSettings.ShowAmbient = ChkShowAmbient.IsChecked ?? true;
                 else if (sender == ChkShowSpeech) AppSettings.ShowSpeech = ChkShowSpeech.IsChecked ?? true;
                 else if (sender == ChkShowDanger) AppSettings.ShowDanger = ChkShowDanger.IsChecked ?? true;

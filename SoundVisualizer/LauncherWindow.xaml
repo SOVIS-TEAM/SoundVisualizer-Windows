@@ -68,6 +68,18 @@
                                 <Button x:Name="BtnDismissNotice" Style="{StaticResource Button.Text}" HorizontalAlignment="Right" Margin="0,4,0,0"
                                         Content="{l:Loc notice.dismiss}" Click="BtnDismissNotice_Click"/>
                             </StackPanel>
+                            <!-- 업데이트 안내(#36, zip 판만). 새 버전이 나왔을 때, 내려받고 바꾸는 동안, 실패했을 때, 바꾼 뒤 처음 열었을 때 보인다.
+                                 무엇을 보일지는 UpdateController 가 정하고 UpdateUpdateNotice(LauncherWindow.Updates.cs)가 넣는다. -->
+                            <StackPanel x:Name="PanelUpdate" Margin="20,8,0,0" Visibility="Collapsed">
+                                <TextBlock x:Name="TxtUpdateNotice" Style="{StaticResource Text.Warning}" Foreground="{StaticResource AccentBrush}"
+                                           AutomationProperties.LiveSetting="Polite"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
+                                    <Button x:Name="BtnHomeUpdatePage" Style="{StaticResource Button.Text}" Content="{l:Loc update.open_page}" Click="BtnUpdatePage_Click"/>
+                                    <Button x:Name="BtnHomeUpdateInstall" Style="{StaticResource Button.Text}" Foreground="{StaticResource AccentBrush}"
+                                            Content="{l:Loc update.install}" Click="BtnUpdateInstall_Click"/>
+                                    <Button x:Name="BtnHomeUpdateDismiss" Style="{StaticResource Button.Text}" Content="{l:Loc notice.dismiss}" Click="BtnUpdateDismiss_Click"/>
+                                </StackPanel>
+                            </StackPanel>
                         </StackPanel>
 
                         <Grid>
@@ -304,6 +316,8 @@
                                         <!-- 개발자 모드에 딸린 스위치. 개발자 모드를 끄면 접는다(값은 남는다. 안드로이드 DependentSettings). -->
                                         <CheckBox x:Name="ChkDeveloperRecord" Style="{StaticResource SwitchRow}" Margin="16,0,0,24" Content="{l:Loc settings.developer_record.title}" ui:SettingRow.Description="{l:Loc settings.developer_record.desc}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
                                         <CheckBox x:Name="ChkAutoMinimizeOnLaunch" Style="{StaticResource SwitchRow}" Content="{l:Loc settings.auto_minimize.title}" ui:SettingRow.Description="{l:Loc settings.auto_minimize.desc}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                                        <!-- 업데이트 확인(#36). zip 판에서만 보인다. Store·Chocolatey 판은 그쪽이 업데이트한다(LauncherWindow.Updates.cs). -->
+                                        <CheckBox x:Name="ChkCheckUpdates" Style="{StaticResource SwitchRow}" Content="{l:Loc settings.update_check.title}" ui:SettingRow.Description="{l:Loc settings.update_check.desc}" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
                                     </StackPanel>
                                 </Border>
 
