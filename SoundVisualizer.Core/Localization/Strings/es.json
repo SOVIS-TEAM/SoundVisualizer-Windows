@@ -243,7 +243,7 @@
   "update.failed_download": "No se pudo descargar la versión nueva. Comprueba tu conexión a internet e inténtalo de nuevo.",
   "update.failed_verify": "El archivo descargado no es válido, así que se detuvo la actualización. Inténtalo de nuevo.",
   "update.failed_apply": "No se pudieron reemplazar los archivos de la app, así que se detuvo la actualización. Tu versión actual no ha cambiado. Descarga la versión nueva desde la página de descargas.",
-  "update.failed_restart": "La versión nueva está instalada, pero no se pudo abrir. Cierra la app y vuelve a abrirla.",
+  "update.failed_restart": "No se pudo abrir la versión nueva. Cierra la app y vuelve a abrirla.",
   "update.readonly": "La app no puede actualizarse sola porque no se puede escribir en esta carpeta. Descarga la versión nueva desde la página de descargas y descomprímela.",
   "update.manual": "Esta versión no se puede descargar desde la app. Descárgala desde la página de descargas.",
   "update.open_page": "Abrir página de descargas",

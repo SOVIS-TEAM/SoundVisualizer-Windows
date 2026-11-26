@@ -243,7 +243,7 @@
   "update.failed_download": "Không thể tải phiên bản mới. Hãy kiểm tra kết nối internet rồi thử lại.",
   "update.failed_verify": "Tệp đã tải không hợp lệ nên đã dừng cập nhật. Hãy thử lại.",
   "update.failed_apply": "Không thể thay tệp của ứng dụng nên đã dừng cập nhật. Phiên bản hiện tại vẫn giữ nguyên. Hãy tải phiên bản mới từ trang tải xuống.",
-  "update.failed_restart": "Đã cài phiên bản mới nhưng không mở được. Hãy đóng ứng dụng rồi mở lại.",
+  "update.failed_restart": "Không mở được phiên bản mới. Hãy đóng ứng dụng rồi mở lại.",
   "update.readonly": "Ứng dụng không thể tự cập nhật vì không ghi được vào thư mục này. Hãy tải phiên bản mới từ trang tải xuống rồi giải nén.",
   "update.manual": "Không thể tải phiên bản này từ ứng dụng. Hãy tải từ trang tải xuống.",
   "update.open_page": "Mở trang tải xuống",

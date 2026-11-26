@@ -243,7 +243,7 @@
   "update.failed_download": "Impossible de télécharger la nouvelle version. Vérifiez votre connexion Internet et réessayez.",
   "update.failed_verify": "Le fichier téléchargé n'est pas valide : la mise à jour a été interrompue. Réessayez.",
   "update.failed_apply": "Impossible de remplacer les fichiers de l'application : la mise à jour a été interrompue. Votre version actuelle n'a pas changé. Téléchargez la nouvelle version depuis la page de téléchargement.",
-  "update.failed_restart": "La nouvelle version est installée, mais elle n'a pas pu s'ouvrir. Fermez l'application et rouvrez-la.",
+  "update.failed_restart": "Impossible d'ouvrir la nouvelle version. Fermez l'application et rouvrez-la.",
   "update.readonly": "L'application ne peut pas se mettre à jour elle-même, car ce dossier n'est pas accessible en écriture. Téléchargez la nouvelle version depuis la page de téléchargement et décompressez-la.",
   "update.manual": "Cette version ne peut pas être téléchargée depuis l'application. Téléchargez-la depuis la page de téléchargement.",
   "update.open_page": "Ouvrir la page de téléchargement",

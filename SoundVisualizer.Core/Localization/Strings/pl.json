@@ -243,7 +243,7 @@
   "update.failed_download": "Nie udało się pobrać nowej wersji. Sprawdź połączenie z internetem i spróbuj ponownie.",
   "update.failed_verify": "Pobrany plik jest nieprawidłowy, więc aktualizacja została przerwana. Spróbuj ponownie.",
   "update.failed_apply": "Nie udało się zastąpić plików aplikacji, więc aktualizacja została przerwana. Obecna wersja się nie zmieniła. Pobierz nową wersję ze strony pobierania.",
-  "update.failed_restart": "Nowa wersja jest zainstalowana, ale nie udało się jej otworzyć. Zamknij aplikację i otwórz ją ponownie.",
+  "update.failed_restart": "Nie udało się otworzyć nowej wersji. Zamknij aplikację i otwórz ją ponownie.",
   "update.readonly": "Aplikacja nie może sama się zaktualizować, ponieważ nie można zapisywać w tym folderze. Pobierz nową wersję ze strony pobierania i rozpakuj ją.",
   "update.manual": "Tej wersji nie można pobrać z aplikacji. Pobierz ją ze strony pobierania.",
   "update.open_page": "Otwórz stronę pobierania",

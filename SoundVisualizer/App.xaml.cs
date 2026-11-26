@@ -31,7 +31,16 @@ namespace SoundVisualizer
             if (previousProcess is { } previousId) WaitForPreviousVersion(previousId);
             // 지난 업데이트를 마무리한다(실행 폴더의 기록 파일을 본다. 기록이 없으면 아무것도 하지 않는다).
             // 파일을 바꾸는 도중 꺼졌으면 옛 파일로 되돌리고, 다 바꿨으면 옛 파일을 지운다.
-            var outcome = UpdateInstaller.RecoverAtStartup(AppContext.BaseDirectory, Environment.ProcessPath);
+            // 업데이트 마무리가 무슨 일로 실패해도 앱은 켜져야 한다.
+            var outcome = UpdateInstaller.StartupOutcome.None;
+            try
+            {
+                outcome = UpdateInstaller.RecoverAtStartup(AppContext.BaseDirectory, Environment.ProcessPath);
+            }
+            catch (Exception ex)
+            {
+                AppLog.Warn("update", "지난 업데이트를 마무리하지 못했습니다.", ex);
+            }
             if (outcome is UpdateInstaller.StartupOutcome.Recovered or UpdateInstaller.StartupOutcome.RecoveredNeedsRestart)
             {
                 AppLog.Warn("update", "지난 업데이트가 파일을 바꾸는 도중 멈춰 옛 파일로 되돌렸습니다.");

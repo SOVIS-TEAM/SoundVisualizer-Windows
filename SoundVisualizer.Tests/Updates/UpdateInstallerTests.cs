@@ -130,28 +130,61 @@ public sealed class UpdateInstallerTests : IDisposable
         Assert.False(Journal());
     }
 
-    /// <summary>바꾸는 도중 꺼진 실행 폴더를 만든다: 앞의 <paramref name="done"/> 개는 바꿨고, 그다음 하나는 옛 파일로 옮긴 뒤 반쯤 복사했다.</summary>
-    private void SimulateCrashAfter(int done)
+    /// <summary>Apply 가 바꾸기 전에 남기는 것과 같은 "바꾸는 중" 기록(UpdateJournalFormatTests 가 이 꼴을 지킨다).</summary>
+    private void WriteApplyingJournal()
     {
-        // Apply 가 남기는 것과 같은 "바꾸는 중" 기록(UpdateJournalFormatTests 가 이 꼴을 지킨다).
         string entries = string.Join(",", _files.Select(f => $"{{\"Path\":{System.Text.Json.JsonSerializer.Serialize(f)},\"Existed\":true}}"));
         File.WriteAllText(P(UpdateInstaller.JournalName), $"{{\"State\":\"applying\",\"Entries\":[{entries}],\"Leftovers\":[]}}");
-        for (int i = 0; i <= done && i < _files.Count; i++)
+    }
+
+    /// <summary>1단계(새 파일을 옆에 복사)에서 꺼졌다: 앞의 <paramref name="copied"/> 개는 복사했고 그다음 하나는 반쯤 복사했다.</summary>
+    private void SimulateCrashWhileCopying(int copied)
+    {
+        WriteApplyingJournal();
+        for (int i = 0; i <= copied && i < _files.Count; i++)
         {
-            string target = P(_files[i]);
-            File.Move(target, target + UpdateInstaller.OldSuffix);
-            if (i < done) File.Copy(Path.Combine(_staging, _files[i]), target);
-            else File.WriteAllText(target, "half"); // 복사하다 꺼짐
+            string fresh = P(_files[i]) + UpdateInstaller.NewSuffix;
+            if (i < copied) File.Copy(Path.Combine(_staging, _files[i]), fresh);
+            else File.WriteAllText(fresh, "half");
         }
+    }
+
+    /// <summary>2단계(이름 바꿔 끼우기)에서 꺼졌다: 앞의 <paramref name="swapped"/> 개는 바꿨고, <paramref name="midSwap"/> 이면 그다음 하나는 옛 파일로만 옮겼다.</summary>
+    private void SimulateCrashWhileSwapping(int swapped, bool midSwap)
+    {
+        WriteApplyingJournal();
+        foreach (var f in _files) File.Copy(Path.Combine(_staging, f), P(f) + UpdateInstaller.NewSuffix);
+        for (int i = 0; i < swapped; i++)
+        {
+            File.Move(P(_files[i]), P(_files[i]) + UpdateInstaller.OldSuffix);
+            File.Move(P(_files[i]) + UpdateInstaller.NewSuffix, P(_files[i]));
+        }
+        if (midSwap) File.Move(P(_files[swapped]), P(_files[swapped]) + UpdateInstaller.OldSuffix); // 제자리 파일이 없는 순간
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(2)]
     [InlineData(4)]
-    public void 바꾸는_도중_꺼졌으면_다음에_켤_때_옛_파일로_되돌린다(int done)
+    public void 새_파일을_복사하다_꺼졌으면_지금_파일은_그대로고_복사본만_지운다(int copied)
     {
-        SimulateCrashAfter(done);
+        SimulateCrashWhileCopying(copied);
+
+        UpdateInstaller.RecoverAtStartup(_install, P("SoundVisualizer.exe"));
+
+        AssertOldVersion();
+        Assert.Equal(0, Leftovers());
+        Assert.False(Journal());
+    }
+
+    [Theory]
+    [InlineData(0, true)]
+    [InlineData(2, false)]
+    [InlineData(2, true)]
+    [InlineData(4, true)]
+    public void 바꿔_끼우다_꺼졌으면_다음에_켤_때_옛_파일로_되돌린다(int swapped, bool midSwap)
+    {
+        SimulateCrashWhileSwapping(swapped, midSwap);
 
         var outcome = UpdateInstaller.RecoverAtStartup(_install, P("SoundVisualizer.exe"));
 
@@ -165,9 +198,99 @@ public sealed class UpdateInstallerTests : IDisposable
     public void 돌고_있는_exe_를_되돌렸으면_다시_열어야_한다고_알린다()
     {
         int exe = _files.ToList().IndexOf("SoundVisualizer.exe");
-        SimulateCrashAfter(exe + 1);
+        SimulateCrashWhileSwapping(exe + 1, midSwap: false);
 
         Assert.Equal(UpdateInstaller.StartupOutcome.RecoveredNeedsRestart, UpdateInstaller.RecoverAtStartup(_install, P("SoundVisualizer.exe")));
+        AssertOldVersion();
+    }
+
+    [Fact]
+    public void 다른_프로세스가_잠그고_있으면_바꾸지도_되돌리지도_않는다()
+    {
+        using (new FileStream(P(UpdateInstaller.LockName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+        {
+            Assert.False(UpdateInstaller.Apply(_staging, _install, _files, out var error));
+            Assert.NotNull(error);
+            AssertOldVersion();
+
+            SimulateCrashWhileSwapping(2, midSwap: false);
+            Assert.Equal(UpdateInstaller.StartupOutcome.None, UpdateInstaller.RecoverAtStartup(_install, null));
+            Assert.True(Journal());
+        }
+        // 잠금이 풀리면 되돌린다.
+        UpdateInstaller.RecoverAtStartup(_install, null);
+        AssertOldVersion();
+    }
+
+    [Fact]
+    public void 기록_없이_남은_옛_파일은_치우고_업데이트한다()
+    {
+        // 기록을 지웠거나 기록이 깨져 주인 없는 옛 파일이 남은 경우. 지금 파일이 있으면 남는 백업이라 지운다.
+        File.WriteAllText(P("SoundVisualizer.exe" + UpdateInstaller.OldSuffix), "stale");
+
+        Assert.True(UpdateInstaller.Apply(_staging, _install, _files, out var error), error?.ToString());
+
+        Assert.Equal("exe new", Read("SoundVisualizer.exe"));
+        Assert.Equal("exe old", Read("SoundVisualizer.exe" + UpdateInstaller.OldSuffix));
+    }
+
+    [Fact]
+    public void 기록_없이_옛_파일만_남았으면_그것이_유일한_사본이라_제자리로_돌린_뒤_업데이트한다()
+    {
+        File.Move(P("onnxruntime.dll"), P("onnxruntime.dll" + UpdateInstaller.OldSuffix));
+
+        Assert.True(UpdateInstaller.Apply(_staging, _install, _files, out var error), error?.ToString());
+
+        Assert.Equal("ort new", Read("onnxruntime.dll"));
+        Assert.True(UpdateInstaller.Revert(_install));
+        Assert.Equal("ort old", Read("onnxruntime.dll"));
+    }
+
+    [Fact]
+    public void 되돌리기_전에_기록을_고치지_못하면_되돌리지_않는다()
+    {
+        // 기록을 "바꾸는 중" 으로 못 바꾸면, 되돌리다 멈췄을 때 다음 실행이 원본을 지울 수 있다. 그래서 새 버전으로 온전한 채 둔다.
+        Assert.True(UpdateInstaller.Apply(_staging, _install, _files, out _));
+        File.SetAttributes(P(UpdateInstaller.JournalName), FileAttributes.ReadOnly);
+
+        Assert.False(UpdateInstaller.Revert(_install));
+
+        Assert.Equal("exe new", Read("SoundVisualizer.exe"));
+        Assert.Equal("model new", Read("AIModel", "yamnet.onnx"));
+        Assert.Equal("exe old", Read("SoundVisualizer.exe" + UpdateInstaller.OldSuffix));
+    }
+
+    [Fact]
+    public void 치워_둔_파일_목록은_다음_업데이트에도_이어진다()
+    {
+        Assert.True(UpdateInstaller.Apply(_staging, _install, _files, out _));
+        File.SetAttributes(P("SoundVisualizer.exe"), FileAttributes.ReadOnly);
+        Assert.True(UpdateInstaller.Revert(_install));
+        string discard = P("SoundVisualizer.exe" + UpdateInstaller.DiscardSuffix);
+        Assert.True(File.Exists(discard)); // 읽기 전용이라 지우지 못하고 남았다
+
+        Assert.True(UpdateInstaller.Apply(_staging, _install, _files, out var error), error?.ToString());
+
+        // 지우지 못한 파일을 잊지 않는다. 지울 수 있게 되면 다음 정리가 지운다.
+        File.SetAttributes(discard, FileAttributes.Normal);
+        UpdateInstaller.RecoverAtStartup(_install, null);
+        Assert.False(File.Exists(discard));
+        Assert.Equal(0, Leftovers());
+    }
+
+    [Theory]
+    [InlineData("{\"State\":\"applying\",\"Entries\":[{}],\"Leftovers\":[]}")]
+    [InlineData("{\"State\":\"applying\",\"Entries\":[null],\"Leftovers\":[]}")]
+    [InlineData("{\"State\":\"cleanup\",\"Entries\":[],\"Leftovers\":[null]}")]
+    [InlineData("{\"State\":\"applied\",\"Entries\":null,\"Leftovers\":[]}")]
+    [InlineData("{\"State\":\"other\",\"Entries\":[],\"Leftovers\":[]}")]
+    [InlineData("")]
+    public void 값이_빠진_기록으로_앱이_꺼지지_않는다(string json)
+    {
+        File.WriteAllText(P(UpdateInstaller.JournalName), json);
+
+        Assert.Equal(UpdateInstaller.StartupOutcome.None, UpdateInstaller.RecoverAtStartup(_install, P("SoundVisualizer.exe")));
+        Assert.Equal(0, UpdateInstaller.CleanupNow(_install));
         AssertOldVersion();
     }
 

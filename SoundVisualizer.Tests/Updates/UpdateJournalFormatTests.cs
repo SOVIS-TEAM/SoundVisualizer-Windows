@@ -53,6 +53,33 @@ public sealed class UpdateJournalFormatTests : IDisposable
     }
 
     [Fact]
+    public void 손으로_쓴_바꾸는_중_기록을_읽어_되돌린다()
+    {
+        // 옛 버전이 바꾸다 꺼지면 새 버전(또는 옛 버전)이 이 기록을 읽어 되돌린다.
+        File.WriteAllText(Path.Combine(_dir, "SoundVisualizer.exe"), "new");
+        File.WriteAllText(Path.Combine(_dir, "SoundVisualizer.exe" + UpdateInstaller.OldSuffix), "old");
+        File.WriteAllText(Path.Combine(_dir, "added.dll"), "new");
+        File.WriteAllText(Path.Combine(_dir, "b.dll" + UpdateInstaller.NewSuffix), "half");
+        File.WriteAllText(Path.Combine(_dir, "b.dll"), "old");
+        File.WriteAllText(Path.Combine(_dir, UpdateInstaller.JournalName),
+            "{\"State\":\"applying\",\"Entries\":[{\"Path\":\"SoundVisualizer.exe\",\"Existed\":true},{\"Path\":\"added.dll\",\"Existed\":false},{\"Path\":\"b.dll\",\"Existed\":true}],\"Leftovers\":[]}");
+
+        UpdateInstaller.RecoverAtStartup(_dir, null);
+
+        Assert.Equal("old", File.ReadAllText(Path.Combine(_dir, "SoundVisualizer.exe")));
+        Assert.False(File.Exists(Path.Combine(_dir, "added.dll")));
+        Assert.Equal("old", File.ReadAllText(Path.Combine(_dir, "b.dll")));
+        Assert.Empty(Directory.EnumerateFiles(_dir, "*.svupdate-*"));
+    }
+
+    [Fact]
+    public void 꼬리와_잠금_이름도_바뀌지_않는다()
+    {
+        Assert.Equal(".svupdate-new", UpdateInstaller.NewSuffix);
+        Assert.Equal(".svupdate-lock", UpdateInstaller.LockName);
+    }
+
+    [Fact]
     public void 손으로_쓴_정리_기록을_읽어_지운다()
     {
         File.WriteAllText(Path.Combine(_dir, "a.dll" + UpdateInstaller.OldSuffix), "x");

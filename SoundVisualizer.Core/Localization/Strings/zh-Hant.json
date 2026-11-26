@@ -243,7 +243,7 @@
   "update.failed_download": "無法下載新版本。請檢查網路連線後再試一次。",
   "update.failed_verify": "下載的檔案無效，已停止更新。請再試一次。",
   "update.failed_apply": "無法取代應用程式檔案，已停止更新。目前的版本維持不變。請從下載頁面取得新版本。",
-  "update.failed_restart": "新版本已安裝，但無法開啟。請關閉應用程式後重新開啟。",
+  "update.failed_restart": "無法開啟新版本。請關閉應用程式後重新開啟。",
   "update.readonly": "無法寫入這個資料夾，因此應用程式無法自行更新。請從下載頁面取得新版本並解壓縮。",
   "update.manual": "這個版本無法在應用程式內下載。請從下載頁面取得。",
   "update.open_page": "開啟下載頁面",

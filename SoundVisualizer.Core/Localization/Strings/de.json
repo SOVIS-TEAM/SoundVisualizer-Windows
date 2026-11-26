@@ -243,7 +243,7 @@
   "update.failed_download": "Die neue Version konnte nicht heruntergeladen werden. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
   "update.failed_verify": "Die heruntergeladene Datei ist ungültig, daher wurde das Update abgebrochen. Versuchen Sie es erneut.",
   "update.failed_apply": "Die App-Dateien konnten nicht ersetzt werden, daher wurde das Update abgebrochen. Ihre aktuelle Version bleibt unverändert. Laden Sie die neue Version von der Downloadseite herunter.",
-  "update.failed_restart": "Die neue Version ist installiert, konnte aber nicht geöffnet werden. Schließen Sie die App und öffnen Sie sie erneut.",
+  "update.failed_restart": "Die neue Version konnte nicht geöffnet werden. Schließen Sie die App und öffnen Sie sie erneut.",
   "update.readonly": "Die App kann sich nicht selbst aktualisieren, weil in diesen Ordner nicht geschrieben werden kann. Laden Sie die neue Version von der Downloadseite herunter und entpacken Sie sie.",
   "update.manual": "Diese Version kann nicht in der App heruntergeladen werden. Laden Sie sie von der Downloadseite herunter.",
   "update.open_page": "Downloadseite öffnen",

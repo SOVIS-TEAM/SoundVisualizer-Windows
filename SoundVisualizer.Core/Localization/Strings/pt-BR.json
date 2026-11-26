@@ -243,7 +243,7 @@
   "update.failed_download": "Não foi possível baixar a nova versão. Confira sua conexão com a internet e tente de novo.",
   "update.failed_verify": "O arquivo baixado não é válido, então a atualização foi interrompida. Tente de novo.",
   "update.failed_apply": "Não foi possível substituir os arquivos do app, então a atualização foi interrompida. Sua versão atual não mudou. Baixe a nova versão na página de downloads.",
-  "update.failed_restart": "A nova versão foi instalada, mas não abriu. Feche o app e abra de novo.",
+  "update.failed_restart": "Não foi possível abrir a nova versão. Feche o app e abra de novo.",
   "update.readonly": "O app não consegue se atualizar porque não é possível gravar nesta pasta. Baixe a nova versão na página de downloads e descompacte.",
   "update.manual": "Esta versão não pode ser baixada pelo app. Baixe na página de downloads.",
   "update.open_page": "Abrir página de downloads",

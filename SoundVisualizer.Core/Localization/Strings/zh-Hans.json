@@ -243,7 +243,7 @@
   "update.failed_download": "无法下载新版本。请检查网络连接后重试。",
   "update.failed_verify": "下载的文件无效，已停止更新。请重试。",
   "update.failed_apply": "无法替换应用文件，已停止更新。当前版本保持不变。请从下载页面获取新版本。",
-  "update.failed_restart": "新版本已安装，但无法打开。请关闭应用后重新打开。",
+  "update.failed_restart": "无法打开新版本。请关闭应用后重新打开。",
   "update.readonly": "无法写入此文件夹，因此应用无法自行更新。请从下载页面获取新版本并解压。",
   "update.manual": "此版本无法在应用内下载。请从下载页面获取。",
   "update.open_page": "打开下载页面",

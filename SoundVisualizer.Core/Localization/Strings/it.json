@@ -243,7 +243,7 @@
   "update.failed_download": "Impossibile scaricare la nuova versione. Controlla la connessione a Internet e riprova.",
   "update.failed_verify": "Il file scaricato non è valido, quindi l'aggiornamento è stato interrotto. Riprova.",
   "update.failed_apply": "Impossibile sostituire i file dell'app, quindi l'aggiornamento è stato interrotto. La versione attuale non è cambiata. Scarica la nuova versione dalla pagina di download.",
-  "update.failed_restart": "La nuova versione è installata, ma non è stato possibile aprirla. Chiudi l'app e riaprila.",
+  "update.failed_restart": "Impossibile aprire la nuova versione. Chiudi l'app e riaprila.",
   "update.readonly": "L'app non può aggiornarsi da sola perché non è possibile scrivere in questa cartella. Scarica la nuova versione dalla pagina di download ed estraila.",
   "update.manual": "Questa versione non può essere scaricata dall'app. Scaricala dalla pagina di download.",
   "update.open_page": "Apri la pagina di download",

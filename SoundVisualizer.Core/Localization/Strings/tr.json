@@ -243,7 +243,7 @@
   "update.failed_download": "Yeni sürüm indirilemedi. İnternet bağlantınızı kontrol edip yeniden deneyin.",
   "update.failed_verify": "İndirilen dosya geçerli değil, bu yüzden güncelleme durduruldu. Yeniden deneyin.",
   "update.failed_apply": "Uygulama dosyaları değiştirilemedi, bu yüzden güncelleme durduruldu. Mevcut sürümünüz değişmedi. Yeni sürümü indirme sayfasından alın.",
-  "update.failed_restart": "Yeni sürüm yüklendi ancak açılamadı. Uygulamayı kapatıp yeniden açın.",
+  "update.failed_restart": "Yeni sürüm açılamadı. Uygulamayı kapatıp yeniden açın.",
   "update.readonly": "Bu klasöre yazılamadığı için uygulama kendini güncelleyemiyor. Yeni sürümü indirme sayfasından alıp arşivden çıkarın.",
   "update.manual": "Bu sürüm uygulamadan indirilemiyor. İndirme sayfasından alın.",
   "update.open_page": "İndirme sayfasını aç",

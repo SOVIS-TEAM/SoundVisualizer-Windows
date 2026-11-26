@@ -243,7 +243,7 @@
   "update.failed_download": "Tidak dapat mengunduh versi baru. Periksa koneksi internet Anda, lalu coba lagi.",
   "update.failed_verify": "File yang diunduh tidak valid, jadi pembaruan dihentikan. Coba lagi.",
   "update.failed_apply": "File aplikasi tidak dapat diganti, jadi pembaruan dihentikan. Versi Anda saat ini tidak berubah. Ambil versi baru dari halaman unduhan.",
-  "update.failed_restart": "Versi baru sudah terpasang, tetapi tidak dapat dibuka. Tutup aplikasi, lalu buka lagi.",
+  "update.failed_restart": "Versi baru tidak dapat dibuka. Tutup aplikasi, lalu buka lagi.",
   "update.readonly": "Aplikasi tidak dapat memperbarui dirinya sendiri karena folder ini tidak dapat ditulisi. Ambil versi baru dari halaman unduhan, lalu ekstrak.",
   "update.manual": "Versi ini tidak dapat diunduh dari aplikasi. Ambil dari halaman unduhan.",
   "update.open_page": "Buka halaman unduhan",

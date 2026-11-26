@@ -243,7 +243,7 @@
   "update.failed_download": "Couldn't download the new version. Check your internet connection and try again.",
   "update.failed_verify": "The downloaded file isn't valid, so the update was stopped. Try again.",
   "update.failed_apply": "Couldn't replace the app files, so the update was stopped. Your current version is unchanged. Get the new version from the download page.",
-  "update.failed_restart": "The new version is installed but couldn't be opened. Close the app and open it again.",
+  "update.failed_restart": "Couldn't open the new version. Close the app and open it again.",
   "update.readonly": "The app can't update itself because this folder can't be written to. Get the new version from the download page and unzip it.",
   "update.manual": "This version can't be downloaded from the app. Get it from the download page.",
   "update.open_page": "Open download page",
