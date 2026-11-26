@@ -2,9 +2,11 @@
 // This file is part of SoundVisualizer.
 // SoundVisualizer is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
@@ -14,37 +16,9 @@ using SoundVisualizer.Localization;
 
 namespace SoundVisualizer.Updates
 {
-    /// <summary>업데이트가 어디까지 왔는지. 홈 안내와 도움말의 앱 정보가 같은 값을 본다.</summary>
-    internal enum UpdatePhase
-    {
-        Idle,
-        Checking,
-        Latest,
-        Available,
-        Downloading,
-        Installing,
-        Failed,
-
-        /// <summary>방금 새 버전으로 바뀌어 열렸다(옛 버전이 --updated-from 으로 띄웠다).</summary>
-        Updated,
-    }
-
-    /// <summary><see cref="UpdatePhase.Failed"/> 의 이유. 이유마다 안내와 다음에 누를 버튼이 다르다.</summary>
-    internal enum UpdateProblem
-    {
-        None,
-        Check,
-        Download,
-        Verify,
-        Apply,
-        Restart,
-        ReadOnly,
-        Manual,
-    }
-
     /// <summary>
     /// 앱 안의 업데이트(#36). zip 판만 GitHub 에 묻고, 내려받아 실행 폴더의 파일을 바꾼 뒤 새 버전을 띄우고 끝난다.
-    /// Store 판과 Chocolatey 판은 인터넷에 접속하지 않는다(그쪽이 업데이트한다).
+    /// Store 판과 Chocolatey 판은 인터넷에 접속하지 않는다(그쪽이 업데이트한다). 무엇을 보일지는 Core 의 <see cref="UpdateView"/> 가 정한다.
     ///
     /// 모든 메서드는 UI 스레드에서 부르고 <see cref="Changed"/> 도 UI 스레드에서 알린다. 파일 일은 작업 스레드로 넘기고 돌아온다.
     /// </summary>
@@ -52,13 +26,21 @@ namespace SoundVisualizer.Updates
     {
         private const string Tag = "update";
 
+        // 지난 업데이트의 옛 파일을 다시 지워 보는 간격. 옛 버전이 막 끝난 때는 그 exe 와 DLL 이 잠깐 더 잡혀 있다.
+        private static readonly TimeSpan[] CleanupRetryDelays = { TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30) };
+
         private static UpdateController? _instance;
 
         /// <summary>앱에 하나. 처음 부를 때(UI 스레드) 만든다.</summary>
         public static UpdateController Instance => _instance ??= new UpdateController();
 
+        /// <summary>지금 실행 폴더의 파일을 바꾸는 중인지. 컨트롤러를 만들지 않고 본다(종료 처리에서 부른다).</summary>
+        public static bool InstallingNow => _instance?.BlocksExit ?? false;
+
         private readonly UpdateClient _client;
         private bool _busy;
+        private CancellationTokenSource? _cleanupCancel;
+        private Task? _cleanupTask;
 
         private UpdateController()
         {
@@ -68,7 +50,7 @@ namespace SoundVisualizer.Updates
 
             var feed = UpdateFeed.Resolve(Environment.GetEnvironmentVariable(UpdateFeed.EnvironmentVariable));
             if (!ReferenceEquals(feed, UpdateFeed.GitHub)) AppLog.Info(Tag, "개발용 업데이트 주소를 씁니다: " + feed.ApiUrl);
-            // 응답 머리까지 기다리는 시간. 내려받는 본문은 따로 정한 시간(InstallAsync)까지 기다린다.
+            // 응답 머리까지 기다리는 시간. 내려받는 본문은 끊김(60초 동안 아무것도 오지 않음)으로만 멈춘다(UpdateClient).
             var http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
             _client = new UpdateClient(http, CurrentVersion, feed);
         }
@@ -91,44 +73,23 @@ namespace SoundVisualizer.Updates
         /// <summary>앱이 직접 GitHub 에 묻고 바꾸는 판인지(zip 판).</summary>
         public bool IsPortable => Channel == UpdateChannel.Portable;
 
-        /// <summary>지금 "지금 업데이트" 를 누를 수 있는지. 내려받기나 확인에서 실패했으면 다시 해 볼 수 있다.</summary>
-        public bool CanInstall => IsPortable && !_busy && Release?.Asset != null
-            && (Phase == UpdatePhase.Available || (Phase == UpdatePhase.Failed && Problem is UpdateProblem.Download or UpdateProblem.Verify));
+        public UpdateSnapshot Snapshot => new(Channel, Phase, Problem, Release, CurrentVersion, _busy, HomeDismissed, Percent);
 
-        /// <summary>받기 페이지를 안내할 때인지. 앱이 직접 바꿀 수 없거나 바꾸다 실패했다.</summary>
-        public bool ShowsDownloadPage => IsPortable && Phase == UpdatePhase.Failed
-            && Problem is UpdateProblem.Check or UpdateProblem.Apply or UpdateProblem.ReadOnly or UpdateProblem.Manual;
+        public bool CanInstall => UpdateView.CanInstall(Snapshot);
+        public bool ShowsDownloadPage => UpdateView.ShowsDownloadPage(Snapshot);
+        public bool ShowsOnHome => UpdateView.ShowsOnHome(Snapshot);
 
-        /// <summary>홈에 안내를 보일지. 저절로 확인하다 실패한 것과 최신이라는 답은 홈에 보이지 않는다(도움말에서 볼 수 있다).</summary>
-        public bool ShowsOnHome => IsPortable && !HomeDismissed && Phase switch
-        {
-            UpdatePhase.Available or UpdatePhase.Downloading or UpdatePhase.Installing or UpdatePhase.Updated => true,
-            UpdatePhase.Failed => Problem != UpdateProblem.Check,
-            _ => false,
-        };
+        /// <summary>
+        /// 실행 폴더의 파일을 바꾸는 중이라 앱을 끝내면 안 된다(창 닫기, 트레이 종료, 로그오프를 막는다). 다 바꾸고 새 버전을 띄운 뒤
+        /// 스스로 끝낼 때는 막지 않는다.
+        /// </summary>
+        public bool BlocksExit => !_handingOver && UpdateView.BlocksExit(Snapshot);
+
+        // 새 버전을 띄웠고 이제 이 프로세스가 끝난다.
+        private bool _handingOver;
 
         /// <summary>지금 상태를 알리는 글. 알릴 것이 없으면 빈 문자열.</summary>
-        public string StatusText() => Phase switch
-        {
-            UpdatePhase.Checking => Loc.Get("update.checking"),
-            UpdatePhase.Latest => Loc.Get("update.latest"),
-            UpdatePhase.Available when Release != null => Loc.Format("update.available", UpdateVersion.Display(Release.Version)),
-            UpdatePhase.Downloading => Loc.Format("update.downloading", Percent),
-            UpdatePhase.Installing => Loc.Get("update.installing"),
-            UpdatePhase.Updated => Loc.Format("update.done", UpdateVersion.Display(CurrentVersion)),
-            UpdatePhase.Failed => Problem switch
-            {
-                UpdateProblem.Check => Loc.Get("update.failed_check"),
-                UpdateProblem.Download => Loc.Get("update.failed_download"),
-                UpdateProblem.Verify => Loc.Get("update.failed_verify"),
-                UpdateProblem.Apply => Loc.Get("update.failed_apply"),
-                UpdateProblem.Restart => Loc.Get("update.failed_restart"),
-                UpdateProblem.ReadOnly => Loc.Get("update.readonly"),
-                UpdateProblem.Manual => Loc.Get("update.manual"),
-                _ => "",
-            },
-            _ => "",
-        };
+        public string StatusText() => string.Join(" ", UpdateView.Status(Snapshot).Select(t => t.Args.Length == 0 ? Loc.Get(t.Key) : Loc.Format(t.Key, t.Args)));
 
         /// <summary>옛 버전이 바꾸고 띄운 새 버전이다. 홈에 "업데이트했습니다" 를 보인다.</summary>
         public void MarkUpdated()
@@ -141,6 +102,40 @@ namespace SoundVisualizer.Updates
         {
             HomeDismissed = true;
             Raise();
+        }
+
+        /// <summary>
+        /// 지난 업데이트의 옛 파일이 남았으면 뒤에서 몇 번 더 지워 본다(앱 시작 때 App 이 부른다). 다음 업데이트를 시작하면 멈추고,
+        /// 그 업데이트가 정리를 넘겨받는다(이번 업데이트의 백업을 지우지 않게).
+        /// </summary>
+        public void StartBackgroundCleanup()
+        {
+            string directory = AppContext.BaseDirectory;
+            if (UpdateInstaller.PendingCleanupCount(directory) == 0) return;
+            var cancel = new CancellationTokenSource();
+            _cleanupCancel = cancel;
+            _cleanupTask = Task.Run(async () =>
+            {
+                try
+                {
+                    int remaining = await UpdateInstaller.CleanupWithRetryAsync(directory, CleanupRetryDelays, cancel.Token);
+                    if (remaining > 0) AppLog.Warn(Tag, $"지난 업데이트의 옛 파일 {remaining}개를 아직 지우지 못했습니다. 다음에 켤 때 다시 지웁니다.");
+                    else AppLog.Info(Tag, "지난 업데이트의 옛 파일을 모두 지웠습니다.");
+                }
+                catch (OperationCanceledException)
+                {
+                    // 다음 업데이트가 넘겨받았다.
+                }
+            });
+        }
+
+        private async Task StopBackgroundCleanupAsync()
+        {
+            _cleanupCancel?.Cancel();
+            if (_cleanupTask != null) await _cleanupTask;
+            _cleanupTask = null;
+            _cleanupCancel?.Dispose();
+            _cleanupCancel = null;
         }
 
         /// <summary>런처를 열 때. zip 판이고 스위치가 켜져 있고 하루가 지났을 때만 묻는다. 실패해도 조용히 지나간다.</summary>
@@ -178,6 +173,7 @@ namespace SoundVisualizer.Updates
                 {
                     AppLog.Warn(Tag, "업데이트를 확인하지 못했습니다.");
                     // 저절로 확인한 것은 알리지 않고 다음에 런처를 열 때 다시 묻는다(마지막 확인 때를 남기지 않는다).
+                    // 이미 찾은 새 버전(Release)은 그대로 두어, 실패를 알리면서도 "지금 업데이트" 를 누를 수 있다(UpdateView.CanInstall).
                     if (manual) Fail(UpdateProblem.Check);
                     else Set(before);
                     return;
@@ -188,7 +184,7 @@ namespace SoundVisualizer.Updates
                 Release = result.Release;
                 if (result.Outcome == UpdateCheckOutcome.Available)
                 {
-                    AppLog.Info(Tag, $"새 버전이 있습니다: {result.Release!.Tag}");
+                    AppLog.Info(Tag, $"새 버전이 있습니다: {result.Release!.Tag}" + (result.Release.Asset == null ? " (앱이 받을 zip 없음)" : ""));
                     HomeDismissed = false;
                     Set(UpdatePhase.Available);
                 }
@@ -208,10 +204,12 @@ namespace SoundVisualizer.Updates
         /// <summary>
         /// 새 버전을 내려받아 확인하고 실행 폴더의 파일을 바꾼 뒤 새 버전을 띄우고 앱을 끝낸다.
         /// <paramref name="prepareForRestart"/> 는 파일을 바꾸기 직전에 부른다(오버레이를 끄고 설정을 저장한다. 오버레이가 쥔 모델 파일을 놓아야 바꿀 수 있다).
+        /// 바꾸는 동안에는 <see cref="BlocksExit"/> 가 참이라 창을 닫거나 로그오프로 끝나지 않는다.
         /// </summary>
         public async Task InstallAsync(Action prepareForRestart)
         {
             if (!CanInstall || Release?.Asset is not { } asset) return;
+            var release = Release;
             string installDirectory = AppContext.BaseDirectory;
             if (!UpdateInstaller.CanWrite(installDirectory))
             {
@@ -221,7 +219,7 @@ namespace SoundVisualizer.Updates
             }
 
             _busy = true;
-            string work = Path.Combine(Path.GetTempPath(), "SoundVisualizer-update", UpdateVersion.Display(Release.Version));
+            string work = Path.Combine(Path.GetTempPath(), "SoundVisualizer-update", UpdateVersion.Display(release.Version));
             string zip = Path.Combine(work, asset.Name);
             string staging = Path.Combine(work, "files");
             try
@@ -231,14 +229,13 @@ namespace SoundVisualizer.Updates
                 var progress = new Progress<double>(p =>
                 {
                     int percent = Math.Clamp((int)Math.Floor(p * 100), 0, 100);
-                    if (percent == Percent) return;
+                    if (percent == Percent || Phase != UpdatePhase.Downloading) return;
                     Percent = percent;
                     Raise();
                 });
                 try
                 {
-                    using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(20));
-                    await _client.DownloadAsync(asset, zip, progress, timeout.Token);
+                    await _client.DownloadAsync(asset, zip, progress, CancellationToken.None);
                 }
                 catch (UpdateVerificationException ex)
                 {
@@ -246,20 +243,22 @@ namespace SoundVisualizer.Updates
                     Fail(UpdateProblem.Verify);
                     return;
                 }
-                catch (Exception ex) when (ex is HttpRequestException or IOException or UnauthorizedAccessException or OperationCanceledException)
+                catch (Exception ex) when (ex is HttpRequestException or IOException or UnauthorizedAccessException or OperationCanceledException or TimeoutException)
                 {
                     AppLog.Warn(Tag, "새 버전을 내려받지 못했습니다.", ex);
                     Fail(UpdateProblem.Download);
                     return;
                 }
 
-                var files = await Task.Run(() => StageAndVerify(zip, staging, Release.Version));
+                var files = await Task.Run(() => StageAndVerify(zip, staging, release.Version));
                 if (files is null)
                 {
                     Fail(UpdateProblem.Verify);
                     return;
                 }
 
+                // 지난 업데이트의 정리가 아직 돌고 있으면 멈추고 넘겨받는다. 이번에 만들 백업을 그 정리가 지우지 않게.
+                await StopBackgroundCleanupAsync();
                 Set(UpdatePhase.Installing);
                 prepareForRestart();
                 Exception? applyError = null;
@@ -270,14 +269,18 @@ namespace SoundVisualizer.Updates
                     Fail(UpdateProblem.Apply);
                     return;
                 }
-                AppLog.Info(Tag, $"{Release.Tag} 로 바꿨습니다. 새 버전을 엽니다.");
+                AppLog.Info(Tag, $"{release.Tag} 로 바꿨습니다. 새 버전을 엽니다.");
                 TryDeleteDirectory(work);
 
                 if (!StartNewVersion(installDirectory))
                 {
-                    Fail(UpdateProblem.Restart);
+                    // 새 버전을 띄우지 못했으면(백신이 막음 등) 옛 파일로 되돌린다. 옛 버전은 아직 돌고 있다.
+                    bool reverted = await Task.Run(() => UpdateInstaller.Revert(installDirectory));
+                    AppLog.Warn(Tag, reverted ? "새 버전을 띄우지 못해 옛 파일로 되돌렸습니다." : "새 버전을 띄우지 못했고 다 되돌리지도 못했습니다. 다음에 켤 때 마저 되돌립니다.");
+                    Fail(reverted ? UpdateProblem.Apply : UpdateProblem.Restart);
                     return;
                 }
+                _handingOver = true;
                 Application.Current.Shutdown();
             }
             finally
@@ -310,7 +313,7 @@ namespace SoundVisualizer.Updates
         }
 
         /// <summary>바꾼 실행 파일을 띄운다. 새 버전은 이 프로세스가 끝나기를 기다린 뒤 설정을 읽는다(UpdateLaunch).</summary>
-        private static bool StartNewVersion(string installDirectory)
+        internal static bool StartNewVersion(string installDirectory, IEnumerable<string>? arguments = null)
         {
             try
             {
@@ -319,7 +322,7 @@ namespace SoundVisualizer.Updates
                     UseShellExecute = false,
                     WorkingDirectory = installDirectory,
                 };
-                foreach (string argument in UpdateLaunch.Arguments(Environment.ProcessId)) start.ArgumentList.Add(argument);
+                foreach (string argument in arguments ?? UpdateLaunch.Arguments(Environment.ProcessId)) start.ArgumentList.Add(argument);
                 using var process = Process.Start(start);
                 return process != null;
             }

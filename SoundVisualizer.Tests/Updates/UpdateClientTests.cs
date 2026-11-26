@@ -156,6 +156,52 @@ public sealed class UpdateClientTests : IDisposable
         Assert.False(File.Exists(target));
     }
 
+    [Fact]
+    public async Task 한동안_아무것도_오지_않으면_끊긴_것으로_보고_파일을_남기지_않는다()
+    {
+        var handler = new FakeHandler(_ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(new StallingStream()) });
+        string target = Path.Combine(_dir, "a.zip");
+
+        await Assert.ThrowsAsync<TimeoutException>(() =>
+            Client(handler).DownloadAsync(AssetFor(new byte[100]), target, null, CancellationToken.None, TimeSpan.FromMilliseconds(200)));
+        Assert.False(File.Exists(target));
+    }
+
+    [Fact]
+    public void 기본_끊김_시간은_60초다()
+    {
+        // 전체 시간에는 한도가 없다. 느린 연결도 조금씩 오면 끝까지 받는다.
+        Assert.Equal(TimeSpan.FromSeconds(60), UpdateClient.DefaultStallTimeout);
+    }
+
+    /// <summary>처음 몇 바이트를 보낸 뒤 더는 아무것도 보내지 않는 연결.</summary>
+    private sealed class StallingStream : Stream
+    {
+        private bool _sent;
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public override void Flush() { }
+        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            if (!_sent)
+            {
+                _sent = true;
+                buffer.Span[..10].Clear();
+                return 10;
+            }
+            await Task.Delay(Timeout.Infinite, cancellationToken);
+            return 0;
+        }
+    }
+
     /// <summary>Progress&lt;T&gt; 는 알림을 다른 스레드로 미뤄 순서를 보기 어렵다. 받은 자리에서 바로 적는다.</summary>
     private sealed class SyncProgress(Action<double> report) : IProgress<double>
     {

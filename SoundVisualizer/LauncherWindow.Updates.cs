@@ -23,6 +23,13 @@ namespace SoundVisualizer
             // Store·Chocolatey 판은 그쪽이 업데이트하므로 스위치를 두지 않는다.
             ChkCheckUpdates.Visibility = updates.IsPortable ? Visibility.Visible : Visibility.Collapsed;
             updates.Changed += OnUpdateChanged;
+            // 실행 폴더의 파일을 바꾸는 몇 초 동안은 창 닫기(X, Alt+F4, 트레이의 종료)로 끝나지 않게 한다. 반쯤 바뀐 채 남지 않게.
+            Closing += (s, e) =>
+            {
+                if (!UpdateController.InstallingNow) return;
+                e.Cancel = true;
+                AppLog.Info("update", "파일을 바꾸는 중이라 닫기를 막았습니다.");
+            };
             UpdateUpdateNotice(announce: false);
 
             // 첫 화면을 그린 뒤 조용할 때 묻는다. 답을 기다리는 동안에도 런처는 그대로 쓸 수 있다.

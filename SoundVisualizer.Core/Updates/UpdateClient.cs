@@ -81,12 +81,17 @@ namespace SoundVisualizer.Updates
             }
         }
 
+        /// <summary>내려받는 동안 이만큼 아무것도 오지 않으면 끊긴 것으로 본다. 느린 연결이라도 조금씩 오면 끝까지 받는다.</summary>
+        public static readonly TimeSpan DefaultStallTimeout = TimeSpan.FromSeconds(60);
+
         /// <summary>
         /// <paramref name="asset"/> 을 <paramref name="targetFile"/> 에 내려받고, 크기와 SHA-256 이 GitHub 이 알려 준 값과 같은지 본다.
         /// 다르면 파일을 지우고 <see cref="UpdateVerificationException"/> 을 던진다. 받는 중에는 0~1 의 진행률을 알린다.
+        /// 전체 시간에는 한도를 두지 않고, <paramref name="stallTimeout"/>(기본 60초) 동안 한 바이트도 오지 않으면 <see cref="TimeoutException"/> 을 던진다.
         /// </summary>
-        public async Task DownloadAsync(ReleaseAsset asset, string targetFile, IProgress<double>? progress, CancellationToken cancellationToken)
+        public async Task DownloadAsync(ReleaseAsset asset, string targetFile, IProgress<double>? progress, CancellationToken cancellationToken, TimeSpan? stallTimeout = null)
         {
+            var stallLimit = stallTimeout ?? DefaultStallTimeout;
             // 확인한 응답에서 온 주소만 받는다. 다른 곳의 자산을 건네받아도 내려받지 않는다.
             if (!_isTrusted(asset.DownloadUrl)) throw new UpdateVerificationException("믿을 수 없는 주소입니다: " + asset.DownloadUrl);
             Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(targetFile))!);
@@ -99,14 +104,25 @@ namespace SoundVisualizer.Updates
                 response.EnsureSuccessStatusCode();
 
                 using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+                using var stall = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 long received = 0;
                 await using (var input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false))
                 await using (var output = new FileStream(targetFile, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
                 {
                     var buffer = new byte[81920];
-                    int read;
-                    while ((read = await input.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
+                    while (true)
                     {
+                        stall.CancelAfter(stallLimit);
+                        int read;
+                        try
+                        {
+                            read = await input.ReadAsync(buffer, stall.Token).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                        {
+                            throw new TimeoutException($"{stallLimit.TotalSeconds:0}초 동안 받은 것이 없습니다.");
+                        }
+                        if (read == 0) break;
                         received += read;
                         if (received > asset.Size) throw new UpdateVerificationException("알려 준 크기보다 큽니다.");
                         hash.AppendData(buffer, 0, read);
