@@ -5,8 +5,8 @@ $toolsDir = "$(Split-Path -Parent $MyInvocation.MyCommand.Definition)"
 $packageArgs = @{
   packageName    = $env:ChocolateyPackageName
   unzipLocation  = $toolsDir
-  url64bit       = 'https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/releases/download/SoundVisualizer_v2.2/SoundVisualizer_v2.2.zip'
-  checksum64     = '30e4ab9379bfcc82952eea86e147fd130fe38eb99fe7986e3b14766880bf3a77'
+  url64bit       = 'https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/releases/download/SoundVisualizer_v2.3.1/SoundVisualizer_v2.3.1.zip'
+  checksum64     = 'c91b801d0931807dc68d9c1bb84f8ec22c0aa70ff18f6fb0336bcffb1159fb05'
   checksumType64 = 'sha256'
 }
 Install-ChocolateyZipPackage @packageArgs
