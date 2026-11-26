@@ -128,8 +128,8 @@ namespace SoundVisualizer
         /// <summary>
         /// 앱 아이콘(실행 파일에 넣은 SoundVisualizer.ico)을 알림 영역 크기로 만든다. 꺼내지 못하면 null(Windows 기본 앱 아이콘을 쓴다).
         ///
-        /// 아이콘에는 어두운 바탕에 가는 고리를 그린 256px 하나만 있다. 셸에 작은 크기로 꺼내 달라고 하면 고리가 빠져
-        /// 검은 네모만 남아서, 256px 을 꺼내 고품질로 줄인다(작업 표시줄 단추처럼 고리가 옅게 남는다).
+        /// 아이콘 파일에는 16~256px 을 크기마다 따로 그려 두었다(작은 크기는 고리를 굵게, 물결 없이). 알림 영역 크기의 그림을 그대로 꺼낸다.
+        /// 큰 그림을 줄이면 물결이 뭉개진다.
         /// </summary>
         private static Drawing.Icon? LoadAppIcon()
         {
@@ -137,30 +137,7 @@ namespace SoundVisualizer
             {
                 string? exe = Environment.ProcessPath;
                 if (exe == null) return null;
-                using var large = Drawing.Icon.ExtractIcon(exe, 0, 256);
-                if (large == null) return null;
-                using var source = large.ToBitmap();
-
-                int size = Forms.SystemInformation.SmallIconSize.Width;
-                using var small = new Drawing.Bitmap(size, size, Drawing.Imaging.PixelFormat.Format32bppArgb);
-                using (var g = Drawing.Graphics.FromImage(small))
-                {
-                    g.InterpolationMode = Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                    g.PixelOffsetMode = Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                    g.DrawImage(source, 0, 0, size, size);
-                }
-
-                // GetHicon 의 핸들은 Icon 이 갖지 않는다. 복사본을 남기고 원래 핸들은 바로 돌려준다.
-                IntPtr handle = small.GetHicon();
-                try
-                {
-                    using var borrowed = Drawing.Icon.FromHandle(handle);
-                    return (Drawing.Icon)borrowed.Clone();
-                }
-                finally
-                {
-                    DestroyIcon(handle);
-                }
+                return Drawing.Icon.ExtractIcon(exe, 0, Forms.SystemInformation.SmallIconSize.Width);
             }
             catch (Exception ex)
             {
@@ -168,9 +145,6 @@ namespace SoundVisualizer
                 return null;
             }
         }
-
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool DestroyIcon(IntPtr handle);
 
         // 잘랐으면 끝에 말줄임표(U+2026)를 단다. 앱 소스의 문자열에는 ASCII 만 쓰므로 글자 코드로 적는다.
         private const char Ellipsis = (char)0x2026;
