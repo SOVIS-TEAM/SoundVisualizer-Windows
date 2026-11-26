@@ -262,6 +262,7 @@
   "more_info.title": "GitHub リポジトリとプロジェクトへの貢献",
   "more_info.body": "SoundVisualizer はオープンソースのプロジェクトで、ソースコードは GitHub で公開されています。バグの報告や機能の提案、開発への貢献を通じてプロジェクトに参加できます。下のボタンをクリックして、公式の GitHub リポジトリにアクセスしてみてください！GitHub の Releases タブでは、最新バージョンを確認してダウンロードすることもできます。",
   "more_info.github_button": "GitHub リポジトリにアクセス",
+  "more_info.update_title": "更新",
 
   "dialog.notice_title": "お知らせ",
   "dialog.already_running": "オーバーレイはすでに実行中です。",

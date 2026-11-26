@@ -262,6 +262,7 @@
   "more_info.title": "Repository GitHub e contributi",
   "more_info.body": "SoundVisualizer è un progetto open source e il suo codice sorgente è pubblico su GitHub. Puoi partecipare segnalando bug, suggerendo funzionalità o contribuendo allo sviluppo. Fai clic sul pulsante qui sotto per visitare il repository ufficiale su GitHub! Nella scheda Releases di GitHub puoi anche controllare e scaricare l'ultima versione.",
   "more_info.github_button": "Visita il repository GitHub",
+  "more_info.update_title": "Aggiornamenti",
 
   "dialog.notice_title": "Avviso",
   "dialog.already_running": "L'overlay è già in esecuzione.",

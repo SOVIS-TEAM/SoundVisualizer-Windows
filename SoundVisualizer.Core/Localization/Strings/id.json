@@ -262,6 +262,7 @@
   "more_info.title": "Repositori GitHub dan kontribusi",
   "more_info.body": "SoundVisualizer adalah proyek open source, dan kode sumbernya terbuka untuk umum di GitHub. Anda dapat ikut serta dengan melaporkan bug, menyarankan fitur, atau berkontribusi dalam pengembangan. Klik tombol di bawah untuk mengunjungi repositori GitHub resmi! Anda juga dapat memeriksa dan mengunduh versi terbaru di tab Releases di GitHub.",
   "more_info.github_button": "Kunjungi repositori GitHub",
+  "more_info.update_title": "Pembaruan",
 
   "dialog.notice_title": "Pemberitahuan",
   "dialog.already_running": "Overlay sudah berjalan.",

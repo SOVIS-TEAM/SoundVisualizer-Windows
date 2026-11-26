@@ -11,7 +11,6 @@ using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using SoundVisualizer.Help;
 using SoundVisualizer.Localization;
-using SoundVisualizer.Updates;
 
 namespace SoundVisualizer
 {
@@ -32,91 +31,16 @@ namespace SoundVisualizer
         private void HelpTab_Loaded(object sender, RoutedEventArgs e)
         {
             Loc.Instance.LanguageChanged += OnLanguageChanged;
-            UpdateController.Instance.Changed += OnUpdateChanged;
             ApplyTexts();
-            ApplyUpdateState(announce: false);
         }
 
-        private void HelpTab_Unloaded(object sender, RoutedEventArgs e)
-        {
-            Loc.Instance.LanguageChanged -= OnLanguageChanged;
-            UpdateController.Instance.Changed -= OnUpdateChanged;
-        }
+        private void HelpTab_Unloaded(object sender, RoutedEventArgs e) => Loc.Instance.LanguageChanged -= OnLanguageChanged;
 
         private void OnLanguageChanged(object? sender, EventArgs e)
         {
             ApplyTexts();
             // 지난 결과 문구는 바뀌기 전 언어다. 다음에 누를 때 다시 나온다.
             TxtReportResult.Visibility = Visibility.Collapsed;
-            _updateNote = "";
-            ApplyUpdateState(announce: false);
-        }
-
-        // ---- 업데이트(#36) ----
-
-        // Store·Chocolatey 판에서 누른 결과(Store 를 열지 못함, 명령을 복사함). zip 판은 컨트롤러의 상태 글을 쓴다.
-        private string _updateNote = "";
-        // 화면 읽어주기에 마지막으로 알린 상태. 내려받는 동안 진행률이 바뀔 때마다 읽지 않는다.
-        private string _announcedUpdate = "";
-
-        private void OnUpdateChanged(object? sender, EventArgs e) => ApplyUpdateState(announce: true);
-
-        /// <summary>앱 정보의 업데이트 칸을 설치 경로와 지금 상태에 맞춘다.</summary>
-        private void ApplyUpdateState(bool announce)
-        {
-            var updates = UpdateController.Instance;
-            bool chocolatey = updates.Channel == UpdateChannel.Chocolatey;
-            PanelChocolatey.Visibility = chocolatey ? Visibility.Visible : Visibility.Collapsed;
-            TxtChocolateyCommand.Text = UpdateChannels.ChocolateyUpgradeCommand;
-
-            BtnUpdateCheck.Visibility = chocolatey ? Visibility.Collapsed : Visibility.Visible;
-            BtnUpdateCheck.Content = Loc.Get(updates.Channel == UpdateChannel.Store ? "update.check_store" : "update.check");
-            BtnUpdateCheck.IsEnabled = !updates.IsBusy;
-            BtnUpdateInstall.Visibility = updates.CanInstall ? Visibility.Visible : Visibility.Collapsed;
-            BtnUpdatePage.Visibility = updates.ShowsDownloadPage ? Visibility.Visible : Visibility.Collapsed;
-
-            string text = updates.IsPortable ? updates.StatusText() : _updateNote;
-            TxtUpdateStatus.Text = text;
-            TxtUpdateStatus.Visibility = text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
-
-            string key = updates.Phase == UpdatePhase.Downloading && updates.IsPortable ? nameof(UpdatePhase.Downloading) : text;
-            if (announce && text.Length > 0 && key != _announcedUpdate && IsVisible)
-            {
-                UIElementAutomationPeer.CreatePeerForElement(TxtUpdateStatus)?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
-            }
-            _announcedUpdate = key;
-        }
-
-        private async void BtnUpdateCheck_Click(object sender, RoutedEventArgs e)
-        {
-            var updates = UpdateController.Instance;
-            if (updates.Channel == UpdateChannel.Store)
-            {
-                // Store 판은 인터넷에 묻지 않고 Store 의 앱 페이지를 연다. 새 버전이 있으면 Store 가 업데이트한다.
-                _updateNote = TryOpen(UpdateChannels.StoreProductUri) ? "" : Loc.Format("dialog.link_error", UpdateChannels.StoreProductUri);
-                ApplyUpdateState(announce: true);
-                return;
-            }
-            await updates.CheckNowAsync();
-        }
-
-        private void BtnUpdateInstall_Click(object sender, RoutedEventArgs e) => (Window.GetWindow(this) as LauncherWindow)?.StartUpdateInstall();
-
-        private void BtnUpdatePage_Click(object sender, RoutedEventArgs e) => LauncherWindow.OpenUpdatePage();
-
-        private void BtnCopyChocolatey_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Clipboard.SetText(UpdateChannels.ChocolateyUpgradeCommand);
-                _updateNote = Loc.Get("update.copied");
-            }
-            catch (ExternalException ex)
-            {
-                AppLog.Warn("help", "명령을 클립보드에 넣지 못했습니다.", ex);
-                _updateNote = Loc.Get("help.report.copy_failed");
-            }
-            ApplyUpdateState(announce: true);
         }
 
         /// <summary>

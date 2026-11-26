@@ -3,19 +3,28 @@
 // SoundVisualizer is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
 using System;
 using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
 using System.Windows.Threading;
+using SoundVisualizer.Help;
 using SoundVisualizer.Localization;
 using SoundVisualizer.Updates;
 
 namespace SoundVisualizer
 {
-    // 앱 안의 업데이트(#36): 홈의 업데이트 안내, 설정의 "시작할 때 업데이트 확인" 스위치, 런처를 열 때의 확인, 지금 업데이트.
-    // 무엇을 할지는 UpdateController 가 정한다. 도움말의 앱 정보도 같은 컨트롤러를 보고, 지금 업데이트는 이 창의 StartUpdateInstall 을 부른다.
+    // 앱 안의 업데이트(#36): 홈의 업데이트 안내, 설정의 "시작할 때 업데이트 확인" 스위치, 런처를 열 때의 확인, 지금 업데이트,
+    // '더 알아보기' 탭의 업데이트 카드(#46). 무엇을 할지는 UpdateController 가 정한다.
     public partial class LauncherWindow
     {
         // 화면 읽어주기에 마지막으로 알린 업데이트 안내. 언어만 바뀐 때나 같은 글을 다시 넣을 때는 다시 읽지 않는다.
         private string _announcedUpdate = "";
+        // '더 알아보기' 업데이트 카드에서 마지막으로 알린 상태.
+        private string _announcedCardUpdate = "";
+        // Store·Chocolatey 판에서 누른 결과(Store 를 열지 못함, 명령을 복사함). zip 판은 컨트롤러의 상태 글을 쓴다.
+        private string _updateNote = "";
 
         private void WatchUpdates()
         {
@@ -58,6 +67,81 @@ namespace SoundVisualizer
             string key = updates.Phase == UpdatePhase.Downloading ? nameof(UpdatePhase.Downloading) : text;
             if (announce && show && key != _announcedUpdate) Announce(TxtUpdateNotice);
             _announcedUpdate = show ? key : "";
+
+            ApplyMoreInfoUpdate(announce);
+        }
+
+        /// <summary>'더 알아보기' 탭의 업데이트 카드를 설치 경로와 지금 상태에 맞춘다.</summary>
+        private void ApplyMoreInfoUpdate(bool announce)
+        {
+            var updates = UpdateController.Instance;
+            string? informational = typeof(LauncherWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            TxtAppVersion.Text = Loc.Format("help.about.version", AppVersionText.Display(informational));
+
+            bool chocolatey = updates.Channel == UpdateChannel.Chocolatey;
+            PanelChocolatey.Visibility = chocolatey ? Visibility.Visible : Visibility.Collapsed;
+            TxtChocolateyCommand.Text = UpdateChannels.ChocolateyUpgradeCommand;
+
+            BtnUpdateCheck.Visibility = chocolatey ? Visibility.Collapsed : Visibility.Visible;
+            BtnUpdateCheck.Content = Loc.Get(updates.Channel == UpdateChannel.Store ? "update.check_store" : "update.check");
+            BtnUpdateCheck.IsEnabled = !updates.IsBusy;
+            BtnUpdateInstall.Visibility = updates.CanInstall ? Visibility.Visible : Visibility.Collapsed;
+            BtnUpdatePage.Visibility = updates.ShowsDownloadPage ? Visibility.Visible : Visibility.Collapsed;
+
+            string text = updates.IsPortable ? updates.StatusText() : _updateNote;
+            TxtUpdateStatus.Text = text;
+            TxtUpdateStatus.Visibility = text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            // 그 탭을 보고 있을 때만 읽는다. 진행률이 바뀔 때마다 읽지는 않는다.
+            string key = updates.Phase == UpdatePhase.Downloading && updates.IsPortable ? nameof(UpdatePhase.Downloading) : text;
+            if (announce && text.Length > 0 && key != _announcedCardUpdate && TxtUpdateStatus.IsVisible)
+            {
+                UIElementAutomationPeer.CreatePeerForElement(TxtUpdateStatus)?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
+            }
+            _announcedCardUpdate = key;
+        }
+
+        private async void BtnUpdateCheck_Click(object sender, RoutedEventArgs e)
+        {
+            var updates = UpdateController.Instance;
+            if (updates.Channel == UpdateChannel.Store)
+            {
+                // Store 판은 인터넷에 묻지 않고 Store 의 앱 페이지를 연다. 새 버전이 있으면 Store 가 업데이트한다.
+                _updateNote = TryOpenLink(UpdateChannels.StoreProductUri) ? "" : Loc.Format("dialog.link_error", UpdateChannels.StoreProductUri);
+                ApplyMoreInfoUpdate(announce: true);
+                return;
+            }
+            await updates.CheckNowAsync();
+        }
+
+        private void BtnCopyChocolatey_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Clipboard.SetText(UpdateChannels.ChocolateyUpgradeCommand);
+                _updateNote = Loc.Get("update.copied");
+            }
+            catch (ExternalException ex)
+            {
+                AppLog.Warn("update", "명령을 클립보드에 넣지 못했습니다.", ex);
+                _updateNote = Loc.Get("help.report.copy_failed");
+            }
+            ApplyMoreInfoUpdate(announce: true);
+        }
+
+        /// <summary>주소를 Windows 가 정한 앱(Store, 브라우저)으로 연다. 열지 못하면 false.</summary>
+        private static bool TryOpenLink(string target)
+        {
+            try
+            {
+                using var process = Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
+                return true;
+            }
+            catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException or PlatformNotSupportedException)
+            {
+                AppLog.Warn("update", "링크를 열지 못했습니다.", ex);
+                return false;
+            }
         }
 
         private void BtnUpdateInstall_Click(object sender, RoutedEventArgs e) => StartUpdateInstall();
@@ -73,9 +157,9 @@ namespace SoundVisualizer
 
         /// <summary>
         /// 지금 업데이트. 오버레이가 켜져 있으면 꺼진다는 것을 먼저 묻는다. 파일을 바꾸기 직전에 오버레이를 끄고 설정을 저장한다
-        /// (오버레이가 쥔 AI 모델 파일을 놓아야 바꿀 수 있다). 홈 안내와 도움말의 버튼이 함께 쓴다.
+        /// (오버레이가 쥔 AI 모델 파일을 놓아야 바꿀 수 있다). 홈 안내와 '더 알아보기' 업데이트 카드의 버튼이 함께 쓴다.
         /// </summary>
-        internal async void StartUpdateInstall()
+        private async void StartUpdateInstall()
         {
             var updates = UpdateController.Instance;
             if (!updates.CanInstall) return;
@@ -92,7 +176,7 @@ namespace SoundVisualizer
         }
 
         /// <summary>받기 페이지(최신 릴리스)를 브라우저로 연다. 열지 못하면 주소를 알린다.</summary>
-        internal static void OpenUpdatePage()
+        private static void OpenUpdatePage()
         {
             string url = UpdateController.Instance.Release?.PageUrl.AbsoluteUri ?? UpdateChannels.LatestReleasePageUrl;
             try

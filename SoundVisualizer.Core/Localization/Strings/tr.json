@@ -262,6 +262,7 @@
   "more_info.title": "GitHub deposu ve katkıda bulunma",
   "more_info.body": "SoundVisualizer açık kaynaklı bir projedir ve kaynak kodu GitHub'da herkese açıktır. Hata bildirerek, özellik önererek veya geliştirmeye katkıda bulunarak projeye dahil olabilirsiniz. Resmî GitHub deposunu ziyaret etmek için aşağıdaki düğmeye tıklayın! Ayrıca GitHub'daki Releases sekmesinden en son sürümü kontrol edip indirebilirsiniz.",
   "more_info.github_button": "GitHub deposunu ziyaret et",
+  "more_info.update_title": "Güncellemeler",
 
   "dialog.notice_title": "Bilgi",
   "dialog.already_running": "Yer paylaşımı zaten çalışıyor.",
