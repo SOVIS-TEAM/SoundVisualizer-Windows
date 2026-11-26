@@ -2,6 +2,8 @@
   "common.language": "Language",
   "common.reset_defaults": "Reset to defaults",
   "common.minimize": "Minimize",
+  "common.maximize": "Maximize",
+  "common.restore": "Restore down",
   "common.close": "Close",
   "language.system": "System default",
 

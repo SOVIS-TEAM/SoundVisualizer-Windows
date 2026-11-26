@@ -2,6 +2,8 @@
   "common.language": "भाषा",
   "common.reset_defaults": "डिफ़ॉल्ट पर रीसेट करें",
   "common.minimize": "छोटा करें",
+  "common.maximize": "अधिकतम करें",
+  "common.restore": "पहले जैसा करें",
   "common.close": "बंद करें",
   "language.system": "सिस्टम डिफ़ॉल्ट",
 

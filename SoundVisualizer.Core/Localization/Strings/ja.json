@@ -2,6 +2,8 @@
   "common.language": "言語",
   "common.reset_defaults": "初期設定に戻す",
   "common.minimize": "最小化",
+  "common.maximize": "最大化",
+  "common.restore": "元のサイズに戻す",
   "common.close": "閉じる",
   "language.system": "システムのデフォルト",
 

@@ -2,6 +2,8 @@
   "common.language": "اللغة",
   "common.reset_defaults": "استعادة الإعدادات التلقائية",
   "common.minimize": "تصغير",
+  "common.maximize": "تكبير",
+  "common.restore": "استعادة",
   "common.close": "إغلاق",
   "language.system": "الإعداد التلقائي للنظام",
 

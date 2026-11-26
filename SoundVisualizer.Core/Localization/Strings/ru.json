@@ -2,6 +2,8 @@
   "common.language": "Язык",
   "common.reset_defaults": "Сбросить настройки",
   "common.minimize": "Свернуть",
+  "common.maximize": "Развернуть",
+  "common.restore": "Свернуть в окно",
   "common.close": "Закрыть",
   "language.system": "Язык системы",
 

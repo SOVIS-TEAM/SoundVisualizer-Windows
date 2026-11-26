@@ -27,6 +27,7 @@ namespace SoundVisualizer
         public LauncherWindow()
         {
             InitializeComponent();
+            InitFrame(); // 최대화·크기 조절·직각 모서리(LauncherWindow.Frame.cs)
             // 탭을 바꾸면 단축키 입력 대기를 그만둔다. 안쪽 목록의 선택 알림도 여기로 올라오므로 탭 줄의 것만 본다.
             Tabs.SelectionChanged += (s, e) => { if (ReferenceEquals(e.OriginalSource, Tabs)) CancelHotkeyBinding(); };
             _modes = new[]
@@ -176,6 +177,7 @@ namespace SoundVisualizer
             EasyView.ApplyCodeTexts();
             ReloadDisplayCards(); // 모니터 칸의 이름("모니터 1", 주 모니터)도 코드가 넣는다
             UpdateUpdateNotice(announce: false); // 업데이트 안내(버전, 진행률)도 코드가 넣는다
+            UpdateMaximizeButton(); // 최대화 버튼의 화면 읽어주기 이름
         }
 
         private void SetStatusUI(bool isRunning)
@@ -657,8 +659,14 @@ namespace SoundVisualizer
 
         private void Window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
-                this.DragMove();
+            if (e.ChangedButton != System.Windows.Input.MouseButton.Left) return;
+            // 제목 줄(언어 칸이 있는 맨 윗줄)을 두 번 누르면 보통 창처럼 최대화한다(#44). 그 밖은 끌어서 옮긴다.
+            if (e.ClickCount == 2 && IsInTitleRow(e))
+            {
+                ToggleMaximize();
+                return;
+            }
+            this.DragMove();
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)

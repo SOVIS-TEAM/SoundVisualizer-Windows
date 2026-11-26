@@ -2,6 +2,8 @@
   "common.language": "Lingua",
   "common.reset_defaults": "Ripristina valori predefiniti",
   "common.minimize": "Riduci a icona",
+  "common.maximize": "Ingrandisci",
+  "common.restore": "Ripristina",
   "common.close": "Chiudi",
   "language.system": "Predefinita di sistema",
 

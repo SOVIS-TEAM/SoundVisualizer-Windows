@@ -2,6 +2,8 @@
   "common.language": "Dil",
   "common.reset_defaults": "Varsayılanlara sıfırla",
   "common.minimize": "Simge durumuna küçült",
+  "common.maximize": "Ekranı kapla",
+  "common.restore": "Önceki boyut",
   "common.close": "Kapat",
   "language.system": "Sistem varsayılanı",
 

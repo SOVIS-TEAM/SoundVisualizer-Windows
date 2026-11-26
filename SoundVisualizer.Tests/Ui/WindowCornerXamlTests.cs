@@ -25,12 +25,19 @@ public class WindowCornerXamlTests
 
     public static TheoryData<string> Windows => new(WindowFiles);
 
+    /// <summary>앱이 창 바깥 테두리를 직접 그리는지: 테두리 없는 창이거나, Windows 창 틀에 WindowChrome 을 씌워 제목 줄을 감춘 창.</summary>
+    private static bool DrawsOwnFrame(XElement window) =>
+        (string?)window.Attribute("WindowStyle") == "None" || window.Descendants(Presentation + "WindowChrome").Any();
+
     [Theory]
     [MemberData(nameof(Windows))]
     public void 창의_바깥_테두리는_모서리가_직각이다(string file)
     {
         var window = XDocument.Parse(AppSource.Read(file.Split('/'))).Root!;
-        Assert.Equal("None", (string?)window.Attribute("WindowStyle"));
+        Assert.True(DrawsOwnFrame(window), $"{file} 는 테두리 없는 창이거나 WindowChrome 을 써야 합니다.");
+        // 런처처럼 Windows 창 틀에 WindowChrome 을 씌운 창은 그 둥글기도 0 이다(Windows 11 의 둥근 모서리는 코드가 끈다).
+        var chrome = window.Descendants(Presentation + "WindowChrome").FirstOrDefault();
+        if (chrome != null) Assert.Equal("0", (string?)chrome.Attribute("CornerRadius"));
 
         // 창의 내용은 리소스(Window.Resources 같은 속성 요소)를 뺀 첫 자식이다.
         var frame = window.Elements().First(e => !e.Name.LocalName.Contains('.', StringComparison.Ordinal));
@@ -49,7 +56,7 @@ public class WindowCornerXamlTests
             .Where(path => !path.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar, StringComparison.Ordinal)
                         && !path.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar, StringComparison.Ordinal))
             .Select(path => (Path: path, Root: XDocument.Load(path).Root!))
-            .Where(x => x.Root.Name == Presentation + "Window" && (string?)x.Root.Attribute("WindowStyle") == "None")
+            .Where(x => x.Root.Name == Presentation + "Window" && DrawsOwnFrame(x.Root))
             .Select(x => Path.GetRelativePath(root, x.Path).Replace(Path.DirectorySeparatorChar, '/'))
             .Where(file => file != "MainWindow.xaml")
             .Order(StringComparer.Ordinal)

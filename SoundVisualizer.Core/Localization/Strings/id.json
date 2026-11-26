@@ -2,6 +2,8 @@
   "common.language": "Bahasa",
   "common.reset_defaults": "Reset ke default",
   "common.minimize": "Minimalkan",
+  "common.maximize": "Maksimalkan",
+  "common.restore": "Pulihkan",
   "common.close": "Tutup",
   "language.system": "Default sistem",
 
