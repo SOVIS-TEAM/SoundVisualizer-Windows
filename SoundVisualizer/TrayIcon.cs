@@ -128,8 +128,8 @@ namespace SoundVisualizer
         /// <summary>
         /// 앱 아이콘(실행 파일에 넣은 SoundVisualizer.ico)을 알림 영역 크기로 만든다. 꺼내지 못하면 null(Windows 기본 앱 아이콘을 쓴다).
         ///
-        /// 아이콘 파일에는 16~256px 을 크기마다 따로 그려 두었다(작은 크기는 고리를 굵게, 물결 없이). 알림 영역 크기의 그림을 그대로 꺼낸다.
-        /// 큰 그림을 줄이면 물결이 뭉개진다.
+        /// 아이콘 파일에는 원래 로고를 16~256px 크기마다 넣어 두었다(40px 이하는 고리 선을 조금 넓혔다, tools/make_icon.py).
+        /// 알림 영역 크기의 그림을 그대로 꺼낸다. 256px 을 여기서 줄이면 가는 고리가 거의 사라진다.
         /// </summary>
         private static Drawing.Icon? LoadAppIcon()
         {
