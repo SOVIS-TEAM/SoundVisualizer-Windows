@@ -2,6 +2,8 @@
   "common.language": "Ngôn ngữ",
   "common.reset_defaults": "Đặt lại về mặc định",
   "common.minimize": "Thu nhỏ",
+  "common.maximize": "Phóng to",
+  "common.restore": "Khôi phục",
   "common.close": "Đóng",
   "language.system": "Mặc định của hệ thống",
 

@@ -2,6 +2,8 @@
   "common.language": "语言",
   "common.reset_defaults": "恢复默认设置",
   "common.minimize": "最小化",
+  "common.maximize": "最大化",
+  "common.restore": "向下还原",
   "common.close": "关闭",
   "language.system": "系统默认",
 

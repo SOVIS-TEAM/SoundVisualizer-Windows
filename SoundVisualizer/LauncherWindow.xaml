@@ -4,33 +4,36 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="SoundVisualizer.LauncherWindow"
         xmlns:l="clr-namespace:SoundVisualizer.Localization"
         xmlns:ui="clr-namespace:SoundVisualizer.Ui"
-        Title="{l:Loc launcher.window_title}" Height="650" Width="800"
+        Title="{l:Loc launcher.window_title}" Height="700" Width="880" MinHeight="560" MinWidth="720"
         WindowStartupLocation="CenterScreen"
-        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        WindowStyle="SingleBorderWindow" ResizeMode="CanResize" Background="{StaticResource BackgroundBrush}"
         MouseLeftButtonDown="Window_MouseLeftButtonDown" PreviewKeyDown="Window_PreviewKeyDown" PreviewKeyUp="Window_PreviewKeyUp" FontFamily="{DynamicResource AppFontFamily}">
+
+    <!-- Windows 창 틀을 그대로 쓰되 제목 줄은 앱이 그린다(#44). 가장자리를 끌어 크기를 바꾸고, 최대화하면 작업 영역을 채운다
+         (LauncherWindow.Frame.cs). 1px 유리 틀은 Windows 가 창 그림자를 그리게 하려고 둔다. -->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="6" GlassFrameThickness="0,0,0,1" CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
 
     <!-- 서식과 색은 Themes/Theme.xaml(App.xaml 에서 합침)에 있다. 아랍어처럼 오른쪽에서 왼쪽으로 쓰는 언어면 내용 전체를 뒤집는다.
          창 바깥 모서리는 보통 Windows 창처럼 직각이다(#37). 앱이 띄우는 다른 창(튜토리얼, 라이선스, 확인, 색 선택)도 같다. -->
-    <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1" FlowDirection="{Binding FlowDirection, Source={x:Static l:Loc.Instance}}">
+    <Border x:Name="RootFrame" Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1" FlowDirection="{Binding FlowDirection, Source={x:Static l:Loc.Instance}}">
         <Grid>
+        <!-- 내용(언어 칸, 탭)은 창을 넓히거나 최대화해도 1200 보다 넓어지지 않고 가운데에 놓인다(#44). 버튼과 카드가 화면 끝까지 늘어나지 않게. -->
+        <Grid x:Name="ContentColumn" MaxWidth="1200">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 제목줄: 언어 콤보와 최소화·닫기 -->
-            <Grid Grid.Row="0" Margin="24,24,24,0">
+            <!-- 제목줄: 언어 콤보. 최소화·최대화·닫기는 창 오른쪽 위 모서리에 따로 둔다(아래). -->
+            <Grid x:Name="TitleRow" Grid.Row="0" Margin="24,24,24,0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,100,0">
                     <TextBlock x:Name="TxtLanguageLabel" Style="{StaticResource Text.Caption}" FontSize="14" Margin="0,0,10,0" Text="{l:Loc common.language}"/>
                     <!-- 항목(시스템 기본값 + 18개 언어)은 LanguagePicker 가 채운다. 키보드로 둘러보는 동안에는 언어가 바뀌지 않는다(CommitOnCloseComboBox). -->
                     <ui:CommitOnCloseComboBox x:Name="CmbLanguage" Style="{StaticResource ComboField}" Width="200"
                                               AutomationProperties.LabeledBy="{Binding ElementName=TxtLanguageLabel}"
                                               SelectionChanged="CmbLanguage_SelectionChanged"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-24,-24,0">
-                    <Button Style="{StaticResource Button.Chrome}" Content="&#xE921;" AutomationProperties.Name="{l:Loc common.minimize}" Click="BtnMinimize_Click"/>
-                    <Button Style="{StaticResource Button.ChromeClose}" Content="&#xE8BB;" AutomationProperties.Name="{l:Loc common.close}" Click="BtnClose_Click"/>
                 </StackPanel>
             </Grid>
 
@@ -355,6 +358,19 @@
                     </ScrollViewer>
                 </TabItem>
             </TabControl>
+        </Grid>
+
+        <!-- 창 버튼: 내용 폭과 상관없이 창의 오른쪽 위 모서리에 붙는다. -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <!-- 창 가장자리의 크기 조절 띠와 겹치는 모서리에서도 누를 수 있게 한다. -->
+            <Button Style="{StaticResource Button.Chrome}" Content="&#xE921;" AutomationProperties.Name="{l:Loc common.minimize}" Click="BtnMinimize_Click"
+                    WindowChrome.IsHitTestVisibleInChrome="True"/>
+            <!-- 최대화 ↔ 이전 크기로. 모양과 이름은 창 상태에 따라 코드가 바꾼다(LauncherWindow.Frame.cs). -->
+            <Button x:Name="BtnMaximize" Style="{StaticResource Button.Chrome}" Content="&#xE922;" Click="BtnMaximize_Click"
+                    WindowChrome.IsHitTestVisibleInChrome="True"/>
+            <Button Style="{StaticResource Button.ChromeClose}" Content="&#xE8BB;" AutomationProperties.Name="{l:Loc common.close}" Click="BtnClose_Click"
+                    WindowChrome.IsHitTestVisibleInChrome="True"/>
+        </StackPanel>
         </Grid>
     </Border>
 </Window>
