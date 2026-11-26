@@ -71,7 +71,9 @@ public class LauncherFrameTests
         var column = Launcher.Descendants().Single(e => (string?)e.Attribute(Xaml + "Name") == "ContentColumn");
         Assert.Equal(1200, Number(column, "MaxWidth"));
         // 창 버튼이 내용 칸 안에 있으면 최대화했을 때 화면 가운데로 따라 들어온다.
-        Assert.DoesNotContain(column.Descendants(Presentation + "Button"), b => ((string?)b.Attribute("Click") ?? "").StartsWith("BtnM", StringComparison.Ordinal) || (string?)b.Attribute("Click") == "BtnClose_Click");
+        string[] chrome = { "BtnMinimize_Click", "BtnMaximize_Click", "BtnClose_Click" };
+        Assert.DoesNotContain(column.Descendants(Presentation + "Button"), b => chrome.Contains((string?)b.Attribute("Click")));
+        Assert.Equal(3, Launcher.Descendants(Presentation + "Button").Count(b => chrome.Contains((string?)b.Attribute("Click"))));
     }
 
     [Fact]
