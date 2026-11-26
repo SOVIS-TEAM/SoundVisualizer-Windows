@@ -485,13 +485,12 @@
         <Setter Property="Height" Value="32"/>
         <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
-        <!-- 모서리 둥글기. 닫기 버튼만 창 모서리에 맞춘다(Tag 글자를 CornerRadius 로 바꿔 읽는다) -->
-        <Setter Property="Tag" Value="0"/>
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRingChrome}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}">
+                    <!-- 창 모서리가 직각이라(#37) 닫기 버튼도 모서리를 둥글리지 않는다. -->
+                    <Border Background="{TemplateBinding Background}">
                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"/>
                     </Border>
                 </ControlTemplate>
@@ -506,7 +505,6 @@
     </Style>
 
     <Style x:Key="Button.ChromeClose" TargetType="Button" BasedOn="{StaticResource Button.Chrome}">
-        <Setter Property="Tag" Value="0,24,0,0"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{StaticResource StopBrush}"/>

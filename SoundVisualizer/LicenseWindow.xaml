@@ -63,7 +63,7 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="{StaticResource CardBrush}" CornerRadius="20" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1"
+    <Border Background="{StaticResource CardBrush}" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1"
             FlowDirection="{Binding FlowDirection, Source={x:Static l:Loc.Instance}}">
         <Grid Margin="24">
             <Grid.RowDefinitions>

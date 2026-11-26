@@ -12,7 +12,7 @@
     <!-- 확인·취소를 묻는 창. 안드로이드 ConfirmDialog(카드 바탕, 굵은 제목, 보조 글자색 본문, 확인·취소)를 런처 서식으로 옮겼다.
          메시지 상자(MessageBox)를 쓰지 않는 것은 그 예/아니요 글자가 앱 언어가 아니라 Windows 언어를 따르기 때문이다.
          본문은 길어도 끝까지 읽게 스크롤된다. 오른쪽에서 왼쪽으로 쓰는 언어면 창 내용 전체를 뒤집는다. -->
-    <Border Background="{StaticResource CardBrush}" CornerRadius="20" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1"
+    <Border Background="{StaticResource CardBrush}" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1"
             FlowDirection="{Binding FlowDirection, Source={x:Static l:Loc.Instance}}">
         <StackPanel Margin="24">
             <!-- 창의 맨 위 제목이라 카드 제목 서식이어도 1단계 제목이다. -->

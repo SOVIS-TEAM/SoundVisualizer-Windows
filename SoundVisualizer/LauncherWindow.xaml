@@ -9,8 +9,9 @@
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         MouseLeftButtonDown="Window_MouseLeftButtonDown" PreviewKeyDown="Window_PreviewKeyDown" PreviewKeyUp="Window_PreviewKeyUp" FontFamily="{DynamicResource AppFontFamily}">
 
-    <!-- 서식과 색은 Themes/Theme.xaml(App.xaml 에서 합침)에 있다. 아랍어처럼 오른쪽에서 왼쪽으로 쓰는 언어면 내용 전체를 뒤집는다. -->
-    <Border CornerRadius="24" Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1" FlowDirection="{Binding FlowDirection, Source={x:Static l:Loc.Instance}}">
+    <!-- 서식과 색은 Themes/Theme.xaml(App.xaml 에서 합침)에 있다. 아랍어처럼 오른쪽에서 왼쪽으로 쓰는 언어면 내용 전체를 뒤집는다.
+         창 바깥 모서리는 보통 Windows 창처럼 직각이다(#37). 앱이 띄우는 다른 창(튜토리얼, 라이선스, 확인, 색 선택)도 같다. -->
+    <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource ControlBrush}" BorderThickness="1" FlowDirection="{Binding FlowDirection, Source={x:Static l:Loc.Instance}}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
