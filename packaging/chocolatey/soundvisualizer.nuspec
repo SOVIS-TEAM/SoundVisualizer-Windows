@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>soundvisualizer</id>
-    <version>2.3.1</version>
+    <version>2.3.2</version>
     <packageSourceUrl>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/tree/main/packaging/chocolatey</packageSourceUrl>
     <owners>sovis</owners>
     <title>SoundVisualizer</title>
@@ -38,7 +38,7 @@ It was designed and tested with deaf and hard-of-hearing students at Seoul Natio
 - This package downloads the official zip from GitHub Releases and checks its SHA-256 checksum, then adds a Start menu shortcut.
 - Also available on the [Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2).
 ]]></description>
-    <releaseNotes>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/releases/tag/SoundVisualizer_v2.3.1</releaseNotes>
+    <releaseNotes>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/releases/tag/SoundVisualizer_v2.3.2</releaseNotes>
   </metadata>
   <files>
     <file src="tools\**" target="tools" />
