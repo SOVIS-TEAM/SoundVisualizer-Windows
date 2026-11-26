@@ -160,6 +160,8 @@ namespace SoundVisualizer
             LanguagePicker.Select(CmbLanguage, AppSettings.Language);
             _isInitializing = wasInitializing;
 
+            // 업데이트 카드의 지난 결과 문구(명령을 복사함 등)는 바뀌기 전 언어다. 다음에 누를 때 다시 나온다.
+            _updateNote = "";
             ApplyCodeTexts();
         }
 

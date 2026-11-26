@@ -262,6 +262,7 @@
   "more_info.title": "Kho lưu trữ GitHub và đóng góp",
   "more_info.body": "SoundVisualizer là dự án nguồn mở, mã nguồn được công khai trên GitHub. Bạn có thể tham gia bằng cách báo lỗi, đề xuất tính năng hoặc đóng góp vào việc phát triển. Hãy nhấp vào nút bên dưới để truy cập kho lưu trữ GitHub chính thức! Bạn cũng có thể xem và tải phiên bản mới nhất trong thẻ Releases trên GitHub.",
   "more_info.github_button": "Truy cập kho lưu trữ GitHub",
+  "more_info.update_title": "Cập nhật",
 
   "dialog.notice_title": "Thông báo",
   "dialog.already_running": "Lớp phủ hiện đang chạy.",

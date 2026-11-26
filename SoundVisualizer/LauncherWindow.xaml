@@ -348,10 +348,35 @@
                         <StackPanel>
                             <Border Style="{StaticResource Card}">
                                 <StackPanel>
-                                    <!-- 이 탭의 하나뿐인 제목이라 1단계다. -->
+                                    <!-- 탭에 따로 제목이 없어 카드 제목이 1단계 제목이다(아래 업데이트 카드도). -->
                                     <TextBlock Style="{StaticResource Text.CardTitle}" Margin="0,0,0,8" AutomationProperties.HeadingLevel="Level1" Text="{l:Loc more_info.title}"/>
                                     <TextBlock Style="{StaticResource Text.Body}" Margin="0,0,0,24" Text="{l:Loc more_info.body}"/>
                                     <Button x:Name="BtnMoreInfoGithub" Style="{StaticResource Button.Primary}" HorizontalAlignment="Left" Content="{l:Loc more_info.github_button}" Click="BtnMoreInfoGithub_Click"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 업데이트(#36, #46). zip 판은 GitHub 에 묻고 바로 바꾼다. Store 판은 Store 를 연다. Chocolatey 판은 choco 명령을 보인다.
+                                 어느 것을 보일지와 글은 코드(ApplyMoreInfoUpdate, LauncherWindow.Updates.cs)가 정한다. 상태 글은 화면 읽어주기가 읽고 지나간다. -->
+                            <Border Style="{StaticResource Card}" Margin="0,16,0,24">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource Text.CardTitle}" Margin="0,0,0,8" AutomationProperties.HeadingLevel="Level1" Text="{l:Loc more_info.update_title}"/>
+                                    <TextBlock x:Name="TxtAppVersion" Style="{StaticResource Text.Body}"/>
+                                    <TextBlock x:Name="TxtUpdateStatus" Style="{StaticResource Text.Body}" Margin="0,8,0,0" Visibility="Collapsed"
+                                               AutomationProperties.LiveSetting="Polite"/>
+                                    <StackPanel x:Name="PanelChocolatey" Visibility="Collapsed">
+                                        <TextBlock Style="{StaticResource Text.Body}" Margin="0,8,0,0" Text="{l:Loc update.chocolatey}"/>
+                                        <!-- 명령은 번역하지 않으므로 아랍어 화면에서도 왼쪽에서 오른쪽으로 둔다. -->
+                                        <Border Background="{StaticResource BackgroundBrush}" CornerRadius="12" Padding="16,12" Margin="0,12,0,0" FlowDirection="LeftToRight">
+                                            <TextBlock x:Name="TxtChocolateyCommand" FontFamily="{StaticResource MonoFontFamily}" FontSize="13" FontWeight="Normal"
+                                                       Foreground="{StaticResource PrimaryTextBrush}" TextWrapping="Wrap"/>
+                                        </Border>
+                                        <Button Style="{StaticResource Button.Secondary}" HorizontalAlignment="Left" Margin="0,12,0,0" Content="{l:Loc update.copy_command}" Click="BtnCopyChocolatey_Click"/>
+                                    </StackPanel>
+                                    <WrapPanel Margin="0,16,0,0">
+                                        <Button x:Name="BtnUpdateCheck" Style="{StaticResource Button.Primary}" Margin="0,0,12,8" Click="BtnUpdateCheck_Click"/>
+                                        <Button x:Name="BtnUpdateInstall" Style="{StaticResource Button.Primary}" Margin="0,0,12,8" Content="{l:Loc update.install}" Visibility="Collapsed" Click="BtnUpdateInstall_Click"/>
+                                        <Button x:Name="BtnUpdatePage" Style="{StaticResource Button.Secondary}" Margin="0,0,12,8" Content="{l:Loc update.open_page}" Visibility="Collapsed" Click="BtnUpdatePage_Click"/>
+                                    </WrapPanel>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
