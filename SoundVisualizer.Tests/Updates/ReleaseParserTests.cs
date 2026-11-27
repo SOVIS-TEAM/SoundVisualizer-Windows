@@ -113,6 +113,85 @@ public class ReleaseParserTests
         Assert.Null(ReleaseParser.Parse(json.ToJsonString())!.Asset);
     }
 
+    internal const string PortableDigest = "c0824bef63e57b436d632ed7f97b2c52fe9dafeb95ef57a7ec127c3b2684f165";
+
+    /// <summary>기본 zip 과 포터블 zip 을 함께 올린 릴리스(2.3.3 부터의 꼴, #64). 순서는 <paramref name="portableFirst"/> 로 정한다.</summary>
+    internal static JsonObject TwoZips(bool portableFirst = false)
+    {
+        var json = Sample();
+        var portable = new JsonObject
+        {
+            ["name"] = "SoundVisualizer_v2.2_portable.zip",
+            ["size"] = 104381910,
+            ["digest"] = "sha256:" + PortableDigest,
+            ["content_type"] = "application/zip",
+            ["browser_download_url"] = "https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/releases/download/SoundVisualizer_v2.2/SoundVisualizer_v2.2_portable.zip",
+        };
+        var assets = (JsonArray)json["assets"]!;
+        if (portableFirst) assets.Insert(0, portable);
+        else assets.Add(portable);
+        return json;
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void 포터블_판은_포터블_zip_을_기본_판은_기본_zip_을_고른다(bool portableFirst)
+    {
+        string json = TwoZips(portableFirst).ToJsonString();
+
+        var portable = ReleaseParser.Parse(json, kind: UpdatePackageKind.Portable)!.Asset!;
+        Assert.Equal("SoundVisualizer_v2.2_portable.zip", portable.Name);
+        Assert.Equal(PortableDigest, portable.Sha256Hex);
+        Assert.Equal(104381910, portable.Size);
+
+        var standard = ReleaseParser.Parse(json)!.Asset!;
+        Assert.Equal("SoundVisualizer_v2.2.zip", standard.Name);
+        Assert.Equal(Digest, standard.Sha256Hex);
+    }
+
+    [Fact]
+    public void 포터블_zip_이_없는_릴리스면_포터블_판도_기본_zip_을_받는다()
+    {
+        // 2.3.2 까지처럼 기본 zip 만 올린 릴리스. 포터블 판도 업데이트는 받는다(exe 옆에 DLL 과 AIModel 이 생긴다).
+        Assert.Equal("SoundVisualizer_v2.2.zip", ReleaseParser.Parse(Sample().ToJsonString(), kind: UpdatePackageKind.Portable)!.Asset!.Name);
+    }
+
+    [Fact]
+    public void 포터블_zip_만_있으면_기본_판은_받지_않고_페이지만_안내한다()
+    {
+        var json = Sample();
+        var asset = Asset(json);
+        asset["name"] = "SoundVisualizer_v2.2_portable.zip";
+        var release = ReleaseParser.Parse(json.ToJsonString());
+        Assert.NotNull(release);
+        Assert.Null(release.Asset);
+    }
+
+    [Fact]
+    public void 포터블_zip_을_믿을_수_없으면_기본_zip_으로_넘어가지_않는다()
+    {
+        var json = TwoZips();
+        ((JsonObject)((JsonArray)json["assets"]!)[1]!)["digest"] = "sha1:0123";
+        var release = ReleaseParser.Parse(json.ToJsonString(), kind: UpdatePackageKind.Portable);
+        Assert.NotNull(release);
+        Assert.Null(release.Asset);
+        // 기본 판은 영향을 받지 않는다.
+        Assert.Equal("SoundVisualizer_v2.2.zip", ReleaseParser.Parse(json.ToJsonString())!.Asset!.Name);
+    }
+
+    [Theory]
+    [InlineData("SoundVisualizer_v2.2_portable.exe")]
+    [InlineData("SoundVisualizer_v2.2-portable.zip")]
+    [InlineData("SoundVisualizer_v2.2_Portable.zip")]
+    [InlineData("SoundVisualizer_v2.2_portable.zip.zip")]
+    public void 이름이_조금이라도_다른_포터블_zip_은_받지_않는다(string name)
+    {
+        var json = Sample();
+        Asset(json)["name"] = name;
+        Assert.Null(ReleaseParser.Parse(json.ToJsonString(), kind: UpdatePackageKind.Portable)!.Asset);
+    }
+
     [Fact]
     public void 다른_파일이_먼저_있어도_zip_을_찾는다()
     {
