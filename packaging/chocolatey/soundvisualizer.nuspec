@@ -36,7 +36,6 @@ It was designed and tested with deaf and hard-of-hearing students at Seoul Natio
 - Games need borderless or windowed mode for the overlay to show on top.
 - Settings are saved in `settings.json` next to the program in the package folder. Copy it somewhere safe before upgrading if you want to keep your settings.
 - This package downloads the official zip from GitHub Releases and checks its SHA-256 checksum, then adds a Start menu shortcut.
-- The app is a single portable `SoundVisualizer.exe`. When it starts, it unpacks its graphics and AI engine files (about 40 MB) into the user's temp folder (`%TEMP%\.net\SoundVisualizer` and `%TEMP%\SoundVisualizer`) and checks the AI models against pinned SHA-256 hashes.
 - Also available on the [Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2).
 ]]></description>
     <releaseNotes>https://github.com/SOVIS-TEAM/SoundVisualizer-Windows/releases/tag/SoundVisualizer_v2.3.3</releaseNotes>

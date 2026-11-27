@@ -1,8 +1,8 @@
-﻿# GitHub 릴리스에 올리는 포터블 zip(SoundVisualizer_v버전.zip)을 만든다(#58).
+﻿# GitHub 릴리스에 함께 올리는 포터블 zip(SoundVisualizer_v버전_portable.zip)을 만든다(#58, #64).
 # 실행 파일 하나에 그래픽·AI 엔진 DLL 과 AI 모델을 넣어(-p:Portable=true), zip 안에서 바로 열거나 exe 만 복사해도 켜진다.
 # zip 에는 SoundVisualizer.exe 와 라이선스 글(LICENSE, THIRD_PARTY.md, Fonts/Pretendard-LICENSE.txt)만 넣는다.
-# 자산 이름은 앱 안의 업데이트(ReleaseInfo)가 받는 꼴(SoundVisualizer_v1.2.zip, SoundVisualizer_v1.2.3.zip)이어야 한다.
-# Microsoft Store 의 MSIX 는 packaging/msix/build-msix.ps1 로 따로 만든다(파일을 나눠 둔다).
+# 이름 끝의 _portable 때문에 앱 안의 업데이트(ReleaseParser)는 이 zip 을 받지 않고, 기본 버전 zip(SoundVisualizer_v버전.zip,
+# packaging/standard/build-standard.ps1)을 받는다. Microsoft Store 의 MSIX 는 packaging/msix/build-msix.ps1 로 따로 만든다.
 #
 # 사용 예:
 #   ./packaging/portable/build-portable.ps1                 # 자산 이름의 버전은 SoundVisualizer.csproj 의 Version
@@ -21,8 +21,8 @@ if (-not $AssetVersion) {
     $AssetVersion = @($proj.Project.PropertyGroup | ForEach-Object { $_.Version } | Where-Object { $_ })[0]
     if (-not $AssetVersion) { throw "SoundVisualizer.csproj 에서 Version 을 찾지 못했습니다." }
 }
-$assetName = "SoundVisualizer_v$AssetVersion.zip"
-if ($assetName -notmatch '^SoundVisualizer_v\d{1,4}(\.\d{1,5}){1,3}\.zip$') { throw "앱 안의 업데이트가 받지 않는 자산 이름입니다: $assetName" }
+$assetName = "SoundVisualizer_v${AssetVersion}_portable.zip"
+if ($assetName -notmatch '^SoundVisualizer_v\d{1,4}(\.\d{1,5}){1,3}_portable\.zip$') { throw "자산 이름이 이상합니다: $assetName" }
 
 $out = Join-Path $root $OutDir
 $stage = Join-Path $out "portable-stage"
