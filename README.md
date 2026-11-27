@@ -135,7 +135,7 @@ Some PC bangs and managed PCs block programs they don't know, and Windows SmartS
 
 ### Updates
 
-- **Standard and portable versions**: once a day, when you open the launcher, the app checks GitHub for the latest version. If there is a new one, a notice appears on Home; click **Update now** and the app downloads the new zip, checks its SHA-256, replaces `SoundVisualizer.exe` in the same folder, and reopens. Your settings file stays. The update installs the standard version; on a portable copy it adds the DLLs and the `AIModel` folder next to the exe. You can also check from Help > About > **Check for updates**, and turn off the automatic check with Settings > Advanced > **Check for updates on start**.
+- **Standard and portable versions**: once a day, when you open the launcher, the app checks GitHub for the latest version. If there is a new one, a notice appears on Home; click **Update now** and the app downloads the new zip, checks its SHA-256, replaces `SoundVisualizer.exe` in the same folder, and reopens. Your settings file stays. The standard version updates to the standard zip and the portable version to the portable zip. (A 2.3.3 portable copy installs the standard version once, adding the DLLs and the `AIModel` folder next to the exe.) You can also check from Help > About > **Check for updates**, and turn off the automatic check with Settings > Advanced > **Check for updates on start**.
 - **Microsoft Store version**: the Store updates the app. The app does not connect to the internet.
 - **Chocolatey version**: update with `choco upgrade soundvisualizer -y` in an administrator Command Prompt. The app does not connect to the internet.
 

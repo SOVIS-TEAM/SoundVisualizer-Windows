@@ -52,7 +52,9 @@ namespace SoundVisualizer.Updates
             if (!ReferenceEquals(feed, UpdateFeed.GitHub)) AppLog.Info(Tag, "개발용 업데이트 주소를 씁니다: " + feed.ApiUrl);
             // 응답 머리까지 기다리는 시간. 내려받는 본문은 끊김(60초 동안 아무것도 오지 않음)으로만 멈춘다(UpdateClient).
             var http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
-            _client = new UpdateClient(http, CurrentVersion, feed);
+            // 포터블 판(실행 파일 안에 모델이 든 빌드)은 포터블 zip 을 받아 포터블로 남는다(#66).
+            var kind = AppModels.IsBundled ? UpdatePackageKind.Portable : UpdatePackageKind.Standard;
+            _client = new UpdateClient(http, CurrentVersion, feed, kind);
         }
 
         public UpdateChannel Channel { get; }

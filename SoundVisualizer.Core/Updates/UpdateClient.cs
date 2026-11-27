@@ -38,14 +38,19 @@ namespace SoundVisualizer.Updates
         private readonly HttpClient _http;
         private readonly Uri _latestUrl;
         private readonly Func<Uri, bool> _isTrusted;
+        private readonly UpdatePackageKind _kind;
 
-        /// <summary><paramref name="feed"/> 를 주지 않으면 GitHub 에 묻는다(<see cref="UpdateFeed.GitHub"/>).</summary>
-        public UpdateClient(HttpClient http, Version currentVersion, UpdateFeed? feed = null)
+        /// <summary>
+        /// <paramref name="feed"/> 를 주지 않으면 GitHub 에 묻는다(<see cref="UpdateFeed.GitHub"/>). <paramref name="kind"/> 는 받을 zip 의
+        /// 종류다(포터블 판은 포터블 zip, #66).
+        /// </summary>
+        public UpdateClient(HttpClient http, Version currentVersion, UpdateFeed? feed = null, UpdatePackageKind kind = UpdatePackageKind.Standard)
         {
             var source = feed ?? UpdateFeed.GitHub;
             _http = http;
             _latestUrl = new Uri(source.ApiUrl);
             _isTrusted = source.IsTrusted;
+            _kind = kind;
             CurrentVersion = UpdateVersion.Normalize(currentVersion);
         }
 
@@ -67,7 +72,7 @@ namespace SoundVisualizer.Updates
                 if (!response.IsSuccessStatusCode) return new UpdateCheckResult(UpdateCheckOutcome.Failed, null);
 
                 string json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-                var release = ReleaseParser.Parse(json, _isTrusted);
+                var release = ReleaseParser.Parse(json, _isTrusted, _kind);
                 if (release is null) return new UpdateCheckResult(UpdateCheckOutcome.Failed, null);
                 return UpdateVersion.IsNewer(release.Version, CurrentVersion)
                     ? new UpdateCheckResult(UpdateCheckOutcome.Available, release)

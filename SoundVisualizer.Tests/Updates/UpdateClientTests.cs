@@ -51,6 +51,21 @@ public sealed class UpdateClientTests : IDisposable
     }
 
     [Theory]
+    [InlineData(UpdatePackageKind.Portable, "SoundVisualizer_v2.2_portable.zip")]
+    [InlineData(UpdatePackageKind.Standard, "SoundVisualizer_v2.2.zip")]
+    public async Task 받을_zip_의_종류에_맞는_자산을_고른다(UpdatePackageKind kind, string expected)
+    {
+        var json = ReleaseParserTests.TwoZips();
+        json["tag_name"] = "SoundVisualizer_v2.3";
+        var client = new UpdateClient(new HttpClient(new FakeHandler(_ => Json(json.ToJsonString()))), Version.Parse("2.2.0"), kind: kind);
+
+        var result = await client.CheckAsync(CancellationToken.None);
+
+        Assert.Equal(UpdateCheckOutcome.Available, result.Outcome);
+        Assert.Equal(expected, result.Release!.Asset!.Name);
+    }
+
+    [Theory]
     [InlineData("2.2.0")]
     [InlineData("2.3.0")]
     public async Task 같거나_낮은_버전이면_최신이다(string current)
