@@ -49,7 +49,6 @@ namespace SoundVisualizer
         private int _aiRequestedRate, _aiRequestedChannels; // 만들기를 요청한 형식. 같은 형식을 거듭 만들지 않게 한다.
         private volatile bool _isClosed;
         private static YamnetClassMap? _classMap;
-        private static readonly string ModelDirectory = System.IO.Path.Combine(AppContext.BaseDirectory, "AIModel");
 
         // 캡처 스레드는 _peaks 에 넣고, 렌더 루프가 프레임마다 가져가 엔진에 넘긴다.
         // 엔진(전체 크기·방향 분포·깊이의 스무딩)은 렌더 스레드만 쓴다.
@@ -635,8 +634,10 @@ namespace SoundVisualizer
                 bool published = false; // 넣은 뒤에는 이 작업이 닫지 않는다(창 닫기나 다음 형식 변경이 닫는다)
                 try
                 {
-                    var classes = _classMap ??= YamnetClassMap.Load(System.IO.Path.Combine(ModelDirectory, "yamnet_class_map.csv"));
-                    created = RealtimeAiPipeline.Create(rate, channels, ModelDirectory, classes,
+                    // 포터블 판은 실행 파일 안의 모델을 임시 폴더에 꺼낸다(처음 한 번 몇 MB 를 쓴다). 이 작업은 UI 스레드 밖이다.
+                    string modelDirectory = AppModels.ResolveDirectory();
+                    var classes = _classMap ??= AppModels.LoadClassMap();
+                    created = RealtimeAiPipeline.Create(rate, channels, modelDirectory, classes,
                         mappingOverrides: () => AppSettings.SoundTypes,
                         tickFailed: ex => AppLog.Warn("ai", "AI 추론 한 번이 실패했습니다.", ex),
                         classificationChanged: _hudRefresh.Notify);

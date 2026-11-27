@@ -44,10 +44,8 @@ namespace SoundVisualizer.Ui
         private const double PillMinWidth = 120;
         private const double PillMaxWidth = 260;
 
-        private static readonly string ClassMapPath = System.IO.Path.Combine(AppContext.BaseDirectory, "AIModel", "yamnet_class_map.csv");
-
         /// <summary>
-        /// 색인 캐시. 클래스 목록(AI 가 읽는 것과 같은 yamnet_class_map.csv)을 처음 쓸 때 화면 스레드 밖에서 한 번 읽는다.
+        /// 색인 캐시. 클래스 목록(AI 가 읽는 것과 같은 yamnet_class_map.csv, 포터블 판은 실행 파일 안의 것)을 처음 쓸 때 화면 스레드 밖에서 한 번 읽는다.
         /// 읽지 못하면 null 이고 탭은 비어 있다(AI 도 같은 파일이 없으면 돌지 않는다).
         /// </summary>
         private static readonly Lazy<Task<SoundIndexCache?>> IndexCache = new(() => Task.Run(CreateIndexCache));
@@ -94,11 +92,11 @@ namespace SoundVisualizer.Ui
         {
             try
             {
-                return new SoundIndexCache(YamnetClassMap.Load(ClassMapPath));
+                return new SoundIndexCache(AppModels.LoadClassMap());
             }
             catch (Exception ex)
             {
-                AppLog.Warn(LogTag, $"소리 목록을 읽지 못해 소리 탭을 비워 둡니다: {ClassMapPath}", ex);
+                AppLog.Warn(LogTag, $"소리 목록을 읽지 못해 소리 탭을 비워 둡니다(실행 파일 안에 모델: {AppModels.IsBundled}).", ex);
                 return null;
             }
         }

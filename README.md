@@ -117,22 +117,34 @@ The project is rigorously engineered for high-performance, real-time background 
 
 ## 🚀 Installation & Quick Start
 
-SoundVisualizer is provided as a lightweight, **portable (no-install)** open-source package for Windows 10/11 (64-bit). You don't need to install .NET. You can also get it from the **[Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2)**.
+SoundVisualizer runs on Windows 10/11 (64-bit) and comes in two versions. Neither needs .NET installed.
+
+| | Portable version | Installed version |
+|---|---|---|
+| Get it from | **[GitHub Releases](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases)** (also Chocolatey) | **[Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2)** |
+| What you get | `SoundVisualizer_vX.Y.Z.zip` holding one `SoundVisualizer.exe` | the Store app |
+| Install | none, just run the exe | from the Store |
+| Updates | in the app (see below) | by the Store |
+| Good for | shared or managed PCs (PC bangs, schools), USB drives | your own PC |
+
+**Portable version**
 
 1. Go to the **[GitHub Releases](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases)** page.
-2. Download the latest `SoundVisualizer_vX.Y.zip` file and extract it to any location on your PC.
-3. Run **`SoundVisualizer.exe`**.
+2. Download the latest `SoundVisualizer_vX.Y.Z.zip` file.
+3. Run **`SoundVisualizer.exe`**. You can run it straight from the zip or copy just the exe anywhere; it needs no other files.
 4. Configure your initial settings and language in the launcher, then click **Start** to activate the overlay.
 
-Your settings are saved in `settings.json` next to `SoundVisualizer.exe`, so the folder can be moved or copied as is.
+Your settings are saved in `settings.json` next to `SoundVisualizer.exe`. When it starts, the portable version unpacks its graphics and AI engine files (about 40 MB) into your temp folder (`%TEMP%\.net\SoundVisualizer` and `%TEMP%\SoundVisualizer`). If Windows clears them, the app unpacks them again.
+
+Some PC bangs and managed PCs block programs they don't know, and Windows SmartScreen may show "Windows protected your PC" because the app is not code-signed. If **More info → Run anyway** is offered, you can use it.
 
 ### Updates
 
-- **Zip version**: once a day, when you open the launcher, the app checks GitHub for the latest version. If there is a new one, a notice appears on Home; click **Update now** and the app downloads the new zip, checks its SHA-256, replaces the files in the same folder, and reopens. Your settings file stays. You can also check from Help > About > **Check for updates**, and turn off the automatic check with Settings > Advanced > **Check for updates on start**.
+- **Portable version**: once a day, when you open the launcher, the app checks GitHub for the latest version. If there is a new one, a notice appears on Home; click **Update now** and the app downloads the new zip, checks its SHA-256, replaces `SoundVisualizer.exe` in the same folder, and reopens. Your settings file stays. You can also check from Help > About > **Check for updates**, and turn off the automatic check with Settings > Advanced > **Check for updates on start**.
 - **Microsoft Store version**: the Store updates the app. The app does not connect to the internet.
 - **Chocolatey version**: update with `choco upgrade soundvisualizer -y` in an administrator Command Prompt. The app does not connect to the internet.
 
-When the zip version checks for updates, it only sends a GitHub API request (with a User-Agent containing the app name and version). It never sends sound, settings or personal information.
+When the portable version checks for updates, it only sends a GitHub API request (with a User-Agent containing the app name and version). It never sends sound, settings or personal information.
 
 ---
 
@@ -151,6 +163,7 @@ To build from source to modify the code or contribute to the project:
    dotnet test SoundVisualizer.Tests/SoundVisualizer.Tests.csproj
    ```
    Or open `SoundVisualizer.slnx` in Visual Studio, build (`Ctrl + Shift + B`), and press `F5` to run.
+4. To make the portable release zip (one exe with the DLLs and AI models inside), run `./packaging/portable/build-portable.ps1`. It writes `artifacts/SoundVisualizer_vX.Y.Z.zip`. The Microsoft Store package comes from `./packaging/msix/build-msix.ps1`.
 
 The solution has three projects: `SoundVisualizer` (the WPF app), `SoundVisualizer.Core` (audio, AI, rendering logic, settings, and the 18 language tables, with no UI dependency), and `SoundVisualizer.Tests` (xUnit tests, including reference outputs for each AI step).
 

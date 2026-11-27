@@ -60,6 +60,8 @@ namespace SoundVisualizer
             // 옛 버전이 막 끝났으면 그 exe 와 DLL 이 잠깐 더 잡혀 있어, 남은 옛 파일은 화면을 막지 않고 뒤에서 몇 번 더 지워 본다.
             UpdateController.Instance.StartBackgroundCleanup();
             if (previousProcess != null) UpdateController.Instance.MarkUpdated();
+            // 옛 zip 판에서 포터블 판으로 업데이트했으면, 이제 쓰지 않는 옛 DLL 과 모델 파일을 치운다(#58).
+            if (previousProcess != null && AppModels.IsBundled) UpdateController.Instance.StartLegacyCleanup();
         }
 
         /// <summary>파일을 바꾸는 몇 초 동안은 로그오프·종료로 끝나지 않게 한다(반쯤 바뀐 채 남지 않게, #36).</summary>
