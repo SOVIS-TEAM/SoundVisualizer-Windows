@@ -38,7 +38,22 @@
     <PackageReference Include="NAudio" Version="2.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--
+    포터블 판(GitHub zip, #58): `dotnet publish -p:Portable=true`(packaging/portable/build-portable.ps1).
+    실행 파일 하나만 있어도 켜지게 그래픽·AI 엔진 DLL 과 AI 모델을 실행 파일에 넣는다. DLL 은 켤 때 .NET 이 %TEMP%\.net 에 풀어 쓰고,
+    모델은 AppModels 가 쓰기 직전에 임시 폴더에 꺼낸다. 실행 폴더(AppContext.BaseDirectory)는 그대로 exe 폴더다.
+    그 밖의 빌드(Microsoft Store 의 MSIX, 개발 빌드, 시험)는 지금처럼 DLL 과 AIModel 폴더를 실행 파일 옆에 둔다.
+  -->
+  <PropertyGroup Condition="'$(Portable)' == 'true'">
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(Portable)' == 'true'">
+    <!-- 리소스 이름은 BundledModels.ResourcePrefix("AIModel/") + 파일 이름이다. -->
+    <EmbeddedResource Include="AIModel\yamnet.onnx;AIModel\yamnet.data;AIModel\yamnet_class_map.csv;AIModel\silero_vad.onnx" LogicalName="AIModel/%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Portable)' != 'true'">
     <None Update="AIModel\yamnet.onnx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -48,7 +63,7 @@
     <None Update="AIModel\yamnet_class_map.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <!-- 말소리 미리보기의 Silero VAD(MIT, 고지는 THIRD_PARTY.md). 다른 모델처럼 실행 파일 옆 AIModel 에 둔다(단일 파일 배포에서도 따로 나간다). -->
+    <!-- 말소리 미리보기의 Silero VAD(MIT, 고지는 THIRD_PARTY.md). 다른 모델처럼 실행 파일 옆 AIModel 에 둔다. -->
     <None Update="AIModel\silero_vad.onnx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

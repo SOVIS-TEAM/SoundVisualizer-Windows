@@ -117,22 +117,34 @@
 
 ## 🚀 설치 및 실행 방법
 
-SoundVisualizer는 설치가 필요 없는 가벼운 **포터블(Portable)** 패키지로 제공됩니다. Windows 10/11 (64비트)에서 돌아가며, .NET 을 따로 설치하지 않아도 됩니다. **[Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2)**에서도 받을 수 있습니다.
+SoundVisualizer는 Windows 10/11 (64비트)에서 돌아가며, 포터블 버전과 설치 버전 두 가지로 받을 수 있습니다. 둘 다 .NET 을 따로 설치하지 않아도 됩니다.
+
+| | 포터블 버전 | 설치 버전 |
+|---|---|---|
+| 받는 곳 | **[GitHub Releases](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases)** (Chocolatey 도 가능) | **[Microsoft Store](https://apps.microsoft.com/detail/9ngh48vcrfw2)** |
+| 받는 파일 | `SoundVisualizer.exe` 하나가 든 `SoundVisualizer_vX.Y.Z.zip` | Store 앱 |
+| 설치 | 없음. exe 를 바로 실행 | Store 에서 설치 |
+| 업데이트 | 앱 안에서(아래 참고) | Store 가 업데이트 |
+| 알맞은 곳 | PC방·학교처럼 여럿이 쓰는 PC, USB | 내 PC |
+
+**포터블 버전**
 
 1. **[GitHub Releases](https://github.com/SOVIS-Team/SoundVisualizer-Windows/releases)** 페이지에 접속합니다.
-2. 최신 버전의 `SoundVisualizer_vX.Y.zip` 파일을 다운로드해 원하는 곳에 압축 해제합니다.
-3. 폴더 내의 **`SoundVisualizer.exe`**를 실행합니다.
+2. 최신 버전의 `SoundVisualizer_vX.Y.Z.zip` 파일을 다운로드합니다.
+3. **`SoundVisualizer.exe`**를 실행합니다. 압축을 풀지 않고 zip 안에서 바로 열어도 되고, exe 하나만 원하는 곳에 복사해 실행해도 됩니다. 다른 파일은 필요 없습니다.
 4. 런처에서 언어 및 초기 설정을 마친 후, **실행**을 눌러 오버레이를 켭니다.
 
-설정은 `SoundVisualizer.exe` 옆의 `settings.json` 에 저장되므로, 폴더를 그대로 옮기거나 복사해도 됩니다.
+설정은 `SoundVisualizer.exe` 옆의 `settings.json` 에 저장됩니다. 포터블 버전은 켤 때 그래픽·AI 엔진 파일(약 40MB)을 임시 폴더(`%TEMP%\.net\SoundVisualizer`, `%TEMP%\SoundVisualizer`)에 풀어 씁니다. Windows 가 이 파일을 지우면 다음에 켤 때 다시 풉니다.
+
+PC방이나 관리되는 PC 가운데에는 모르는 프로그램의 실행을 막는 곳이 있습니다. 또 앱에 코드 서명이 없어 Windows SmartScreen 이 "Windows의 PC 보호" 창을 띄울 수 있습니다. **추가 정보 → 실행**이 보이면 눌러 실행할 수 있습니다.
 
 ### 업데이트
 
-- **zip 판**: 런처를 열 때 하루에 한 번 GitHub에 최신 버전을 확인합니다. 새 버전이 있으면 홈에 알림이 뜨고, **지금 업데이트**를 누르면 새 zip을 내려받아 SHA-256을 확인한 뒤 같은 폴더의 파일을 바꾸고 다시 엽니다. 설정 파일은 그대로 남습니다. 도움말 > 앱 정보의 **업데이트 확인**으로 직접 확인할 수도 있고, 설정 > 고급의 **시작할 때 업데이트 확인**으로 자동 확인을 끌 수 있습니다.
+- **포터블 버전**: 런처를 열 때 하루에 한 번 GitHub에 최신 버전을 확인합니다. 새 버전이 있으면 홈에 알림이 뜨고, **지금 업데이트**를 누르면 새 zip을 내려받아 SHA-256을 확인한 뒤 같은 폴더의 `SoundVisualizer.exe` 를 바꾸고 다시 엽니다. 설정 파일은 그대로 남습니다. 도움말 > 앱 정보의 **업데이트 확인**으로 직접 확인할 수도 있고, 설정 > 고급의 **시작할 때 업데이트 확인**으로 자동 확인을 끌 수 있습니다.
 - **Microsoft Store 판**: Store가 업데이트합니다. 앱은 인터넷에 접속하지 않습니다.
 - **Chocolatey 판**: 관리자 권한 명령 프롬프트에서 `choco upgrade soundvisualizer -y` 로 업데이트합니다. 앱은 인터넷에 접속하지 않습니다.
 
-업데이트를 확인할 때 zip 판이 보내는 것은 GitHub API 요청(앱 이름과 버전이 든 User-Agent)뿐이며, 소리·설정·사용자 정보는 보내지 않습니다.
+업데이트를 확인할 때 포터블 버전이 보내는 것은 GitHub API 요청(앱 이름과 버전이 든 User-Agent)뿐이며, 소리·설정·사용자 정보는 보내지 않습니다.
 
 ---
 
@@ -151,6 +163,7 @@ SoundVisualizer는 설치가 필요 없는 가벼운 **포터블(Portable)** 패
    dotnet test SoundVisualizer.Tests/SoundVisualizer.Tests.csproj
    ```
    또는 Visual Studio 에서 `SoundVisualizer.slnx` 를 열어 빌드(`Ctrl + Shift + B`)하고 실행(`F5`)합니다.
+4. 릴리스에 올리는 포터블 zip(DLL 과 AI 모델을 넣은 exe 하나)은 `./packaging/portable/build-portable.ps1` 로 만듭니다. `artifacts/SoundVisualizer_vX.Y.Z.zip` 이 생깁니다. Microsoft Store 패키지는 `./packaging/msix/build-msix.ps1` 로 만듭니다.
 
 솔루션은 세 프로젝트로 나뉩니다. `SoundVisualizer`(WPF 앱), `SoundVisualizer.Core`(오디오, AI, 렌더링 계산, 설정, 18개 언어 문자열 표. 화면에 의존하지 않음), `SoundVisualizer.Tests`(xUnit 테스트. AI 각 단계의 기준 출력 비교 포함).
 

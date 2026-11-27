@@ -129,6 +129,29 @@ namespace SoundVisualizer.Updates
             });
         }
 
+        /// <summary>
+        /// 옛 zip 판(2.3.2 이하)에서 앱 안의 업데이트로 포터블 판이 막 켜졌으면, 옛 판이 실행 폴더에 남긴 DLL 과 모델 파일을 뒤에서
+        /// 지운다(#58, <see cref="LegacyPackageFiles"/>). 옛 버전이 막 끝나 파일이 잠깐 잡혀 있을 수 있어 몇 번 더 해 본다.
+        /// 앱 안의 업데이트로 켜졌을 때만 부른다(그때만 이 폴더가 앱 폴더임을 안다).
+        /// </summary>
+        public void StartLegacyCleanup()
+        {
+            string directory = AppContext.BaseDirectory;
+            if (LegacyPackageFiles.Remaining(directory) == 0) return;
+            Task.Run(async () =>
+            {
+                int failed = LegacyPackageFiles.Remove(directory);
+                foreach (var delay in CleanupRetryDelays)
+                {
+                    if (failed == 0) break;
+                    await Task.Delay(delay);
+                    failed = LegacyPackageFiles.Remove(directory);
+                }
+                if (failed > 0) AppLog.Warn(Tag, $"옛 zip 판의 파일 {failed}개를 지우지 못했습니다. 새 버전은 이 파일을 쓰지 않습니다.");
+                else AppLog.Info(Tag, "옛 zip 판이 남긴 DLL 과 모델 파일을 지웠습니다.");
+            });
+        }
+
         private async Task StopBackgroundCleanupAsync()
         {
             _cleanupCancel?.Cancel();
